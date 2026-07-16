@@ -41,4 +41,16 @@ strings_overrides:
 #   blocks:
 #     delivery_pickup:
 #       enabled_for: none
-blocks: {}
+#
+# portfolio -> "all": PawContact's business_type dropdown (tally_form.yaml)
+# classifies grooming AND vet clinics as "pets" (keyword-scored by
+# build_client_from_intake.py::normalize_business_type — verified, not
+# guessed), and "pets" isn't in the engine default's enabled_for
+# (creative/beauty/wellness/professional/fitness). Widened to "all" so a
+# groomer's before/after work or a vet's facility photos can still show —
+# every one of PawContact's 4 segments can plausibly want a portfolio link.
+# delivery_pickup stays on defaults: boutiques classify as "retail" cleanly,
+# already covered by food/retail.
+blocks:
+  portfolio:
+    enabled_for: all

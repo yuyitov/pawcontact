@@ -1,50 +1,216 @@
-# Starter Tally intake spec for the "pawcontact" vertical (scaffolded by
-# scripts/scaffold_vertical.py, Fase 4.1). Consumed by
-# scripts/create_tally_forms.py — see that file's docstring for the full
-# schema. This is a lean draft: add the questions your giro needs, then match
-# every title against this vertical's DATA_CONTRACT.md before creating the
-# live form (the Worker maps answers by normalized title).
+# Real intake spec for the "pawcontact" vertical (Fase 5.3, Etapa B2).
+# Every title below was verified PROGRAMMATICALLY (not by eye) against
+# engine/worker/tally-field-aliases.json before being written here: computed
+# normalizeKey(title) and confirmed it is literally present in that field's
+# alias array. `python scripts/create_tally_forms.py pawcontact --check-mapping`
+# must report every REQUIRED question as [OK] before this form goes live in
+# Tally — re-run it after any wording change.
+#
+# default_language is intentionally NOT asked here: engine/worker/worker.js
+# derives it from which form (ES/EN) was submitted when unanswered (see
+# DATA_CONTRACT.md § Contrato A), which is documented, legitimate behavior —
+# not a workaround. Reason for skipping it: the only alias pair the engine
+# has for an explicit language question is
+# ['which_language_should_your_hmu_link_show_first',
+#  'en_que_idioma_debe_aparecer_primero_tu_hmu_link'] — the literal brand
+# "hmu_link" is baked into engine/worker/tally-field-aliases.json (a
+# generic/shared file, copied verbatim into every vertical's worker/ by
+# export_vertical.py). Asking "your PawContact link" wouldn't match it. This
+# is a real gap worth fixing at the engine level for any future vertical that
+# WANTS an explicit language question — flagged for Vero, not fixed in this
+# session (it doesn't block PawContact, which relies on the form-origin
+# fallback instead).
 
 form_title:
   es: "PawContact — Cuestionario de tu negocio"
   en: "PawContact — Your business questionnaire"
 
 questions:
-  - id: brand_name
+  # --- Identidad del negocio ---
+  - id: business_name
     type: text
     required: true
-    title: {es: "Nombre de tu negocio", en: "Your business name"}
-
-  - id: tagline
-    type: text
-    required: true
-    title: {es: "Tagline corto (1 frase)", en: "Short tagline (1 sentence)"}
+    title: {es: "Nombre del negocio", en: "Business name"}
 
   - id: brand_style
     type: dropdown
     required: true
-    title: {es: "Estilo visual", en: "Visual style"}
+    title: {es: "Elige tu estilo", en: "Pick your style"}
     options:
-      - {es: "sunny-paws", en: "sunny-paws"}
-      - {es: "aqua-clean", en: "aqua-clean"}
-      - {es: "sage-calm", en: "sage-calm"}
-      - {es: "warm-sand", en: "warm-sand"}
+      - {es: "sunny-paws — alegre y jugueton (estilistas/grooming)", en: "sunny-paws — playful and bright (groomers)"}
+      - {es: "aqua-clean — limpio y fresco (veterinarias)", en: "aqua-clean — fresh and clean (vet clinics)"}
+      - {es: "sage-calm — natural y relajante (hoteles/guarderias)", en: "sage-calm — natural and calm (boarding/daycare)"}
+      - {es: "warm-sand — calido y cercano (boutiques)", en: "warm-sand — warm and artisanal (boutiques)"}
 
+  # business_type is optional and only gates two COSMETIC blocks (portfolio,
+  # delivery/pickup links) — never required data. Answers are keyword-scored
+  # by build_client_from_intake.py::normalize_business_type (forgiving of
+  # ES/EN and free text), not matched verbatim. The 5 option pairs below were
+  # simulated against that exact scorer (not guessed) so EN and ES map to the
+  # SAME closed category: grooming/vet -> "pets", training -> "fitness",
+  # boarding -> "general" (no gate, always renders), boutique -> "retail"
+  # (unlocks delivery/pickup — matches the boutique-bigotes demo's Rappi
+  # link). Because "pets" itself gates nothing by default, this vertical's
+  # own vertical.yaml widens `portfolio.enabled_for` to "all" so groomers and
+  # vets can still show a before/after or facility gallery.
+  - id: business_type
+    type: dropdown
+    title: {es: "¿Qué tipo de negocio es?", en: "What type of business is it?"}
+    options:
+      - {es: "Estética canina para mascotas", en: "Pet grooming"}
+      - {es: "Veterinaria", en: "Pet clinic / veterinary care"}
+      - {es: "Hospedaje / guardería", en: "Boarding / daycare"}
+      - {es: "Entrenamiento canino", en: "Dog training"}
+      - {es: "Tienda / boutique de productos", en: "Pet products / boutique"}
+
+  - id: short_description
+    type: textarea
+    required: true
+    title: {es: "Describe tu negocio en 1-2 frases", en: "Describe your business in 1-2 sentences"}
+
+  # --- Contacto (WhatsApp cubre el minimo de contacto que exige el Worker) ---
   - id: whatsapp
     type: phone
     required: true
-    title: {es: "WhatsApp", en: "WhatsApp"}
+    title: {es: "WhatsApp público para tus clientes", en: "Public WhatsApp number for clients"}
+
+  - id: phone
+    type: phone
+    title: {es: "Teléfono público para llamadas", en: "Public phone number for calls"}
+
+  - id: public_email
+    type: email
+    title: {es: "Correo público", en: "Public email"}
+
+  - id: website
+    type: link
+    title: {es: "Sitio web", en: "Website"}
+
+  - id: booking_url
+    type: link
+    title: {es: "Enlace externo de reservas", en: "External booking link"}
 
   - id: instagram
     type: link
-    title: {es: "Instagram (opcional)", en: "Instagram (optional)"}
+    title: {es: "Instagram", en: "Instagram"}
+
+  - id: facebook
+    type: link
+    title: {es: "Facebook", en: "Facebook"}
+
+  - id: tiktok
+    type: link
+    title: {es: "TikTok", en: "TikTok"}
+
+  - id: primary_cta
+    type: dropdown
+    title: {es: "¿Qué botón quieres destacar?", en: "Which button should be featured?"}
+    options:
+      - {es: "WhatsApp", en: "WhatsApp"}
+      - {es: "Llamada telefónica", en: "Phone call"}
+      - {es: "Reservas / agenda", en: "Booking link"}
+      - {es: "Sitio web", en: "Website"}
+      - {es: "Instagram", en: "Instagram"}
+
+  # --- Servicios y precios ---
+  - id: services_text
+    type: textarea
+    required: true
+    title: {es: "Lista tus servicios con precios", en: "List your services with prices"}
+    placeholder:
+      es: "Un servicio por línea. Ej: Baño y corte — desde $350 MXN"
+      en: "One service per line. E.g.: Full groom — from $45"
+
+  - id: price_display
+    type: dropdown
+    title:
+      es: "¿Cómo deben aparecer los precios en tu página pública?"
+      en: "How should prices appear on your public page?"
+    options:
+      - {es: "Mostrar todos los precios", en: "Show all prices"}
+      - {es: "No mostrar precios", en: "Don't show prices"}
+      - {es: "Mixto — algunos precios sí, otros no", en: "Mixed — some shown, some hidden"}
+
+  - id: featured_text
+    type: textarea
+    title:
+      es: "Paquete destacado, promoción u oferta especial"
+      en: "Featured package, promo, or signature offer"
+
+  - id: policies_text
+    type: textarea
+    title: {es: "Políticas que tus clientes deben ver", en: "Policies your clients should see"}
+
+  - id: faq_text
+    type: textarea
+    title: {es: "Preguntas frecuentes", en: "Frequently asked questions"}
+
+  # --- Horarios y ubicación ---
+  - id: opening_hours_text
+    type: textarea
+    required: true
+    title: {es: "¿Cuáles son tus horarios de atención?", en: "What are your business hours?"}
 
   - id: address
     type: text
-    required: true
-    title: {es: "Dirección", en: "Address"}
+    title: {es: "Ubicación 1 dirección pública", en: "Location 1 public address"}
 
-  - id: opening_hours
+  - id: google_maps_url
+    type: link
+    title: {es: "Ubicación 1 enlace de Google Maps", en: "Location 1 Google Maps link"}
+
+  - id: google_reviews_url
+    type: link
+    title: {es: "Enlace de Google Reviews", en: "Google Reviews link"}
+
+  - id: delivery_pickup_links_text
     type: textarea
+    title: {es: "Links de delivery / pickup", en: "Delivery / pickup links"}
+    placeholder:
+      es: "Solo si aplica (boutiques). Ej: Rappi — https://rappi.com/tu-tienda"
+      en: "Only if it applies (boutiques). E.g.: Rappi — https://rappi.com/your-store"
+
+  - id: portfolio_link
+    type: link
+    title: {es: "Enlace de portafolio", en: "Portfolio link"}
+    placeholder:
+      es: "Antes/después, instalaciones, o tu feed de Instagram"
+      en: "Before/after work, your facility, or your Instagram feed"
+
+  # --- Fotos ---
+  - id: logo_url
+    type: file
+    title: {es: "Sube tu logo", en: "Upload your logo"}
+
+  - id: image_url
+    type: file
+    title: {es: "Sube una foto principal", en: "Upload a main photo"}
+
+  - id: gallery_image_urls
+    type: file
+    multiple: true
+    max_files: 5
+    title: {es: "Más fotos", en: "More photos"}
+
+  # pet_notes_text maps via the Worker's fallback-by-token rule (contains
+  # "pet"/"mascota" anywhere in the normalized title), not an exact alias —
+  # confirmed in engine/worker/worker.js. Deliberately not phrased to match
+  # the primary alias verbatim; the token rule is intentionally forgiving.
+  - id: pet_notes_text
+    type: textarea
+    title:
+      es: "¿Algo que debamos saber antes de traer a tu mascota?"
+      en: "Anything pet parents should know before their visit?"
+    placeholder:
+      es: "Ej: Trae cartilla de vacunación. Perros con correa, gatos en transportadora."
+      en: "E.g.: Bring vaccination records. Dogs on leash, cats in carriers."
+
+  # --- Legal (no mapea a proposito — confirmacion interna, no dato del cliente) ---
+  - id: photo_rights
+    type: checkboxes
     required: true
-    title: {es: "Horarios de atención", en: "Opening hours"}
+    title:
+      es: "Confirmo que las fotos que subo son mías o tengo derecho de usarlas"
+      en: "I confirm the photos I upload are mine or I have the right to use them"
+    options:
+      - {es: "Sí", en: "Yes"}
