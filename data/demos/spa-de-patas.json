@@ -1,0 +1,137 @@
+{
+  "public_slug": "spa-de-patas",
+  "business_name": "Spa de Patas",
+  "business_type": "beauty",
+  "brand_style": "sunny-paws",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 2345 6789",
+  "instagram": "https://instagram.com/spadepatas.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/spadepatas.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Spa+de+Patas+Demo",
+  "google_reviews_url": "https://g.page/r/spa-de-patas-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Estética y spa para perros y gatos consentidos ✂️🐶🐱",
+      "address": "Calle Amores 512, Col. Nápoles, CDMX",
+      "opening_hours_text": "Mar–Dom 10:00–19:00 · Lun cerrado",
+      "service_categories": [
+        "Estética canina",
+        "Estética felina",
+        "Spa"
+      ],
+      "services": [
+        {
+          "category": "Estética canina",
+          "name": "Baño + secado (razas pequeñas)",
+          "price_label": "$300 MXN"
+        },
+        {
+          "category": "Estética canina",
+          "name": "Corte de raza + baño (medianas)",
+          "price_label": "$480 MXN"
+        },
+        {
+          "category": "Estética canina",
+          "name": "Deslanado profundo",
+          "price_label": "$380 MXN"
+        },
+        {
+          "category": "Estética felina",
+          "name": "Baño felino sin estrés",
+          "description": "Manejo gentil certificado, sin jaulas de secado",
+          "price_label": "$420 MXN"
+        },
+        {
+          "category": "Estética felina",
+          "name": "Corte higiénico felino",
+          "price_label": "$260 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Mascarilla de avena + aromaterapia",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Corte de uñas + limpieza de oídos",
+          "price_label": "$120 MXN"
+        }
+      ],
+      "pet_notes_text": "Cartilla de vacunación al día obligatoria.\nAvísanos si tu mascota es nerviosa: agendamos horario tranquilo.",
+      "policies": [
+        "Solo con cita; agenda por WhatsApp.",
+        "Tolerancia de 15 minutos para citas.",
+        "Fotos del antes y después en cada visita."
+      ],
+      "featured_package": {
+        "name": "Día de Consentido",
+        "description": "Baño + corte + mascarilla + aromaterapia + pañoleta de regalo",
+        "price_label": "$720 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Grooming and spa for pampered dogs and cats ✂️🐶🐱",
+      "address": "Calle Amores 512, Col. Nápoles, CDMX",
+      "opening_hours_text": "Tue–Sun 10:00–19:00 · Mon closed",
+      "service_categories": [
+        "Dog grooming",
+        "Cat grooming",
+        "Spa"
+      ],
+      "services": [
+        {
+          "category": "Dog grooming",
+          "name": "Bath + blow-dry (small breeds)",
+          "price_label": "$300 MXN"
+        },
+        {
+          "category": "Dog grooming",
+          "name": "Breed cut + bath (medium breeds)",
+          "price_label": "$480 MXN"
+        },
+        {
+          "category": "Dog grooming",
+          "name": "Deep de-shedding",
+          "price_label": "$380 MXN"
+        },
+        {
+          "category": "Cat grooming",
+          "name": "Stress-free cat bath",
+          "description": "Certified gentle handling, no drying cages",
+          "price_label": "$420 MXN"
+        },
+        {
+          "category": "Cat grooming",
+          "name": "Cat hygiene trim",
+          "price_label": "$260 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Oatmeal mask + aromatherapy",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Nail trim + ear cleaning",
+          "price_label": "$120 MXN"
+        }
+      ],
+      "pet_notes_text": "Up-to-date vaccination record required.\nLet us know if your pet gets nervous: we'll book a quiet slot.",
+      "policies": [
+        "By appointment only; book via WhatsApp.",
+        "15-minute grace period for appointments.",
+        "Before & after photos at every visit."
+      ],
+      "featured_package": {
+        "name": "Pamper Day",
+        "description": "Bath + cut + mask + aromatherapy + free bandana",
+        "price_label": "$720 MXN"
+      }
+    }
+  }
+}

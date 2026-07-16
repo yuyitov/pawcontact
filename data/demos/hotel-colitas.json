@@ -1,0 +1,136 @@
+{
+  "public_slug": "hotel-colitas",
+  "business_name": "Hotel & Guardería Colitas",
+  "business_type": "wellness",
+  "brand_style": "sage-calm",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 3456 7890",
+  "instagram": "https://instagram.com/hotelcolitas.demo",
+  "facebook": "https://facebook.com/hotelcolitas.demo",
+  "google_maps_url": "https://maps.google.com/?q=Hotel+Colitas+Demo",
+  "google_reviews_url": "https://g.page/r/hotel-colitas-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Hotel y guardería campestre donde tu perro vacaciona como tú 🌿🐕",
+      "address": "Camino a Santa Fe km 4.5, Cuajimalpa, CDMX",
+      "opening_hours_text": "Recepción Lun–Dom 8:00–20:00",
+      "service_categories": [
+        "Guardería de día",
+        "Hospedaje",
+        "Extras"
+      ],
+      "services": [
+        {
+          "category": "Guardería de día",
+          "name": "Día de juego (jornada completa)",
+          "description": "Grupos por tamaño y temperamento, supervisión todo el día",
+          "price_label": "$350 MXN"
+        },
+        {
+          "category": "Guardería de día",
+          "name": "Media jornada",
+          "price_label": "$220 MXN"
+        },
+        {
+          "category": "Guardería de día",
+          "name": "Paquete 10 días de juego",
+          "price_label": "$2,990 MXN"
+        },
+        {
+          "category": "Hospedaje",
+          "name": "Noche en suite individual",
+          "description": "Cama elevada, cámara en vivo y paseos incluidos",
+          "price_label": "$550 MXN"
+        },
+        {
+          "category": "Hospedaje",
+          "name": "Noche en suite compartida (hermanos)",
+          "price_label": "$900 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Baño de salida",
+          "price_label": "$280 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Transporte redondo (CDMX)",
+          "price_label": "$250 MXN"
+        }
+      ],
+      "pet_notes_text": "Requisito: cartilla al día + prueba de socialización gratuita.\nTrae su alimento habitual etiquetado.\nTe mandamos fotos y video de su estancia todos los días.",
+      "policies": [
+        "Check-in desde las 8:00; check-out hasta las 20:00.",
+        "Solo perros sociables; la prueba de socialización es gratis.",
+        "Cancelación sin costo con 48 h de anticipación."
+      ],
+      "featured_package": {
+        "name": "Semana Vacacional",
+        "description": "7 noches de hospedaje + días de juego + baño de salida + reporte diario con fotos",
+        "price_label": "$3,850 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Countryside hotel and daycare where your dog vacations like you do 🌿🐕",
+      "address": "Camino a Santa Fe km 4.5, Cuajimalpa, CDMX",
+      "opening_hours_text": "Front desk Mon–Sun 8:00–20:00",
+      "service_categories": [
+        "Daycare",
+        "Boarding",
+        "Extras"
+      ],
+      "services": [
+        {
+          "category": "Daycare",
+          "name": "Full play day",
+          "description": "Groups by size and temperament, supervised all day",
+          "price_label": "$350 MXN"
+        },
+        {
+          "category": "Daycare",
+          "name": "Half day",
+          "price_label": "$220 MXN"
+        },
+        {
+          "category": "Daycare",
+          "name": "10 play-day pack",
+          "price_label": "$2,990 MXN"
+        },
+        {
+          "category": "Boarding",
+          "name": "Night in a private suite",
+          "description": "Raised bed, live camera and walks included",
+          "price_label": "$550 MXN"
+        },
+        {
+          "category": "Boarding",
+          "name": "Night in a shared suite (siblings)",
+          "price_label": "$900 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Check-out bath",
+          "price_label": "$280 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Round-trip transport (CDMX)",
+          "price_label": "$250 MXN"
+        }
+      ],
+      "pet_notes_text": "Requirements: up-to-date vaccination record + free socialization test.\nBring their usual food, labeled.\nWe send photos and video of their stay every day.",
+      "policies": [
+        "Check-in from 8:00; check-out until 20:00.",
+        "Sociable dogs only; the socialization test is free.",
+        "Free cancellation up to 48 h in advance."
+      ],
+      "featured_package": {
+        "name": "Vacation Week",
+        "description": "7 nights of boarding + play days + check-out bath + daily photo report",
+        "price_label": "$3,850 MXN"
+      }
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "public_slug": "boutique-bigotes",
+  "business_name": "Boutique Bigotes",
+  "business_type": "retail",
+  "brand_style": "warm-sand",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 4567 8901",
+  "instagram": "https://instagram.com/boutiquebigotes.demo",
+  "tiktok": "https://tiktok.com/@boutiquebigotes.demo",
+  "delivery_pickup_links": [
+    {
+      "label": "Rappi",
+      "url": "https://rappi.com.mx/tiendas/boutique-bigotes-demo"
+    }
+  ],
+  "google_maps_url": "https://maps.google.com/?q=Boutique+Bigotes+Demo",
+  "google_reviews_url": "https://g.page/r/boutique-bigotes-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Accesorios, premios naturales y regalos para consentir a tu mascota 🎀🐾",
+      "address": "Av. Michoacán 78, Col. Condesa, CDMX",
+      "opening_hours_text": "Lun–Sáb 11:00–20:00 · Dom 11:00–17:00",
+      "service_categories": [
+        "Accesorios",
+        "Premios y alimento",
+        "Regalos"
+      ],
+      "services": [
+        {
+          "category": "Accesorios",
+          "name": "Collares y correas artesanales",
+          "price_label": "Desde $250 MXN"
+        },
+        {
+          "category": "Accesorios",
+          "name": "Camas y mantas",
+          "price_label": "Desde $480 MXN"
+        },
+        {
+          "category": "Accesorios",
+          "name": "Pañoletas bordadas con nombre",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Premios y alimento",
+          "name": "Premios naturales deshidratados (100 g)",
+          "price_label": "$95 MXN"
+        },
+        {
+          "category": "Premios y alimento",
+          "name": "Galletas horneadas de la casa",
+          "price_label": "$70 MXN"
+        },
+        {
+          "category": "Regalos",
+          "name": "Caja regalo \"Nuevo cachorro\"",
+          "description": "Juguete + manta + premios + guía de bienvenida",
+          "price_label": "$650 MXN"
+        },
+        {
+          "category": "Regalos",
+          "name": "Tarjeta de regalo",
+          "price_label": "Desde $300 MXN"
+        }
+      ],
+      "policies": [
+        "Entrega el mismo día por Rappi en la zona.",
+        "Apartado por WhatsApp hasta por 48 h.",
+        "Cambios dentro de los primeros 15 días con ticket."
+      ],
+      "featured_package": {
+        "name": "Kit Cumpleañero",
+        "description": "Pastel para perro + gorrito + pañoleta + sesión mini de fotos en tienda",
+        "price_label": "$520 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Accessories, natural treats and gifts to spoil your pet 🎀🐾",
+      "address": "Av. Michoacán 78, Col. Condesa, CDMX",
+      "opening_hours_text": "Mon–Sat 11:00–20:00 · Sun 11:00–17:00",
+      "service_categories": [
+        "Accessories",
+        "Treats & food",
+        "Gifts"
+      ],
+      "services": [
+        {
+          "category": "Accessories",
+          "name": "Handmade collars and leashes",
+          "price_label": "From $250 MXN"
+        },
+        {
+          "category": "Accessories",
+          "name": "Beds and blankets",
+          "price_label": "From $480 MXN"
+        },
+        {
+          "category": "Accessories",
+          "name": "Embroidered name bandanas",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Treats & food",
+          "name": "Natural dehydrated treats (100 g)",
+          "price_label": "$95 MXN"
+        },
+        {
+          "category": "Treats & food",
+          "name": "House-baked cookies",
+          "price_label": "$70 MXN"
+        },
+        {
+          "category": "Gifts",
+          "name": "\"New puppy\" gift box",
+          "description": "Toy + blanket + treats + welcome guide",
+          "price_label": "$650 MXN"
+        },
+        {
+          "category": "Gifts",
+          "name": "Gift card",
+          "price_label": "From $300 MXN"
+        }
+      ],
+      "policies": [
+        "Same-day delivery via Rappi in the area.",
+        "Hold items via WhatsApp for up to 48 h.",
+        "Exchanges within 15 days with receipt."
+      ],
+      "featured_package": {
+        "name": "Birthday Kit",
+        "description": "Dog cake + party hat + bandana + mini photo session in store",
+        "price_label": "$520 MXN"
+      }
+    }
+  }
+}

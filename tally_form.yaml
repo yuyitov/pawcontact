@@ -1,0 +1,50 @@
+# Starter Tally intake spec for the "pawcontact" vertical (scaffolded by
+# scripts/scaffold_vertical.py, Fase 4.1). Consumed by
+# scripts/create_tally_forms.py — see that file's docstring for the full
+# schema. This is a lean draft: add the questions your giro needs, then match
+# every title against this vertical's DATA_CONTRACT.md before creating the
+# live form (the Worker maps answers by normalized title).
+
+form_title:
+  es: "PawContact — Cuestionario de tu negocio"
+  en: "PawContact — Your business questionnaire"
+
+questions:
+  - id: brand_name
+    type: text
+    required: true
+    title: {es: "Nombre de tu negocio", en: "Your business name"}
+
+  - id: tagline
+    type: text
+    required: true
+    title: {es: "Tagline corto (1 frase)", en: "Short tagline (1 sentence)"}
+
+  - id: brand_style
+    type: dropdown
+    required: true
+    title: {es: "Estilo visual", en: "Visual style"}
+    options:
+      - {es: "sunny-paws", en: "sunny-paws"}
+      - {es: "aqua-clean", en: "aqua-clean"}
+      - {es: "sage-calm", en: "sage-calm"}
+      - {es: "warm-sand", en: "warm-sand"}
+
+  - id: whatsapp
+    type: phone
+    required: true
+    title: {es: "WhatsApp", en: "WhatsApp"}
+
+  - id: instagram
+    type: link
+    title: {es: "Instagram (opcional)", en: "Instagram (optional)"}
+
+  - id: address
+    type: text
+    required: true
+    title: {es: "Dirección", en: "Address"}
+
+  - id: opening_hours
+    type: textarea
+    required: true
+    title: {es: "Horarios de atención", en: "Opening hours"}

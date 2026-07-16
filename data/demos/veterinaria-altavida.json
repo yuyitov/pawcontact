@@ -1,0 +1,134 @@
+{
+  "public_slug": "veterinaria-altavida",
+  "business_name": "Veterinaria AltaVida",
+  "business_type": "professional",
+  "brand_style": "aqua-clean",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 1234 5678",
+  "phone": "+52 55 1234 5679",
+  "instagram": "https://instagram.com/veterinaria.altavida.demo",
+  "google_maps_url": "https://maps.google.com/?q=Veterinaria+AltaVida+Demo",
+  "google_reviews_url": "https://g.page/r/veterinaria-altavida-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Medicina veterinaria con corazón, para perros y gatos 🩺🐾",
+      "address": "Av. Coyoacán 890, Col. Del Valle, CDMX",
+      "opening_hours_text": "Lun–Vie 9:00–20:00 · Sáb 9:00–15:00 · Urgencias 24/7",
+      "service_categories": [
+        "Consulta y prevención",
+        "Diagnóstico",
+        "Cirugía"
+      ],
+      "services": [
+        {
+          "category": "Consulta y prevención",
+          "name": "Consulta general",
+          "description": "Revisión completa + plan de salud personalizado",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Consulta y prevención",
+          "name": "Esquema de vacunación (perro o gato)",
+          "price_label": "Desde $350 MXN"
+        },
+        {
+          "category": "Consulta y prevención",
+          "name": "Desparasitación",
+          "price_label": "$250 MXN"
+        },
+        {
+          "category": "Diagnóstico",
+          "name": "Laboratorio (biometría + química sanguínea)",
+          "price_label": "$890 MXN"
+        },
+        {
+          "category": "Diagnóstico",
+          "name": "Ultrasonido abdominal",
+          "price_label": "$750 MXN"
+        },
+        {
+          "category": "Cirugía",
+          "name": "Esterilización (perro o gato)",
+          "price_label": "Desde $1,800 MXN"
+        },
+        {
+          "category": "Cirugía",
+          "name": "Limpieza dental con anestesia",
+          "price_label": "$1,500 MXN"
+        }
+      ],
+      "pet_notes_text": "Trae la cartilla de vacunación de tu mascota.\nPerros con correa y gatos en transportadora, por favor.\nUrgencias 24/7 por WhatsApp.",
+      "policies": [
+        "Consultas con cita; urgencias se atienden de inmediato.",
+        "Aceptamos efectivo y tarjeta.",
+        "Los resultados de laboratorio se entregan el mismo día."
+      ],
+      "featured_package": {
+        "name": "Chequeo Anual Completo",
+        "description": "Consulta + vacunas del año + desparasitación + perfil de laboratorio",
+        "price_label": "$1,450 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Veterinary medicine with heart, for dogs and cats 🩺🐾",
+      "address": "Av. Coyoacán 890, Col. Del Valle, CDMX",
+      "opening_hours_text": "Mon–Fri 9:00–20:00 · Sat 9:00–15:00 · 24/7 emergencies",
+      "service_categories": [
+        "Checkups & prevention",
+        "Diagnostics",
+        "Surgery"
+      ],
+      "services": [
+        {
+          "category": "Checkups & prevention",
+          "name": "General checkup",
+          "description": "Full exam + personalized health plan",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Checkups & prevention",
+          "name": "Vaccination plan (dog or cat)",
+          "price_label": "From $350 MXN"
+        },
+        {
+          "category": "Checkups & prevention",
+          "name": "Deworming",
+          "price_label": "$250 MXN"
+        },
+        {
+          "category": "Diagnostics",
+          "name": "Lab work (CBC + blood chemistry)",
+          "price_label": "$890 MXN"
+        },
+        {
+          "category": "Diagnostics",
+          "name": "Abdominal ultrasound",
+          "price_label": "$750 MXN"
+        },
+        {
+          "category": "Surgery",
+          "name": "Spay / neuter (dog or cat)",
+          "price_label": "From $1,800 MXN"
+        },
+        {
+          "category": "Surgery",
+          "name": "Dental cleaning under anesthesia",
+          "price_label": "$1,500 MXN"
+        }
+      ],
+      "pet_notes_text": "Please bring your pet's vaccination record.\nDogs on a leash and cats in a carrier, please.\n24/7 emergencies via WhatsApp.",
+      "policies": [
+        "Checkups by appointment; emergencies are seen right away.",
+        "We take cash and cards.",
+        "Lab results are delivered the same day."
+      ],
+      "featured_package": {
+        "name": "Complete Annual Checkup",
+        "description": "Checkup + yearly vaccines + deworming + lab panel",
+        "price_label": "$1,450 MXN"
+      }
+    }
+  }
+}

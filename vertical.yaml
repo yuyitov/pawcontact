@@ -1,0 +1,44 @@
+# Brand/domain config for the "pawcontact" vertical (scaffolded by
+# scripts/scaffold_vertical.py, Fase 4.1; renamed from "patitas" on 2026-07-16
+# once Vero picked the real brand and bought the domain). Schema and semantics:
+# engine/generator/vertical_config.py.
+id: pawcontact
+brand_name: "PawContact"
+domain: "https://www.pawcontact.com"
+
+# Which of the engine's closed brand styles this vertical may use. Each name
+# must have a matching engine/generator/styles/<name>.css. Edit this list to
+# taste; run `python scripts/scaffold_vertical.py --list-styles` to see all.
+styles:
+  catalog:
+    - sunny-paws
+    - aqua-clean
+    - sage-calm
+    - warm-sand
+
+# Per-language UI string overrides layered on the engine base STRINGS
+# (engine/generator/strings_base.py). Empty by default. If you override ANY
+# key you must declare BOTH languages (even as {}) so ES/EN parity can't
+# break silently (house rule). Example:
+#   strings_overrides:
+#     es:
+#       btn_booking: "Agendar cita"
+#     en: {}
+strings_overrides:
+  es: {}
+  en: {}
+
+# Conditional-block overrides layered on the engine registry
+# (engine/generator/blocks.py, ENGINE_BLOCKS). Each block gates on the
+# payload's `business_type` via `enabled_for`:
+#   - list of business types -> renders only for those types (payloads with
+#     no business_type, or "general", always keep the block)
+#   - "all"  -> renders for every business type
+#   - "none" -> this vertical never renders the block
+# Empty {} = use the engine defaults (delivery_pickup: food/retail;
+# portfolio: creative/beauty/wellness/professional/fitness; lookbook: all).
+# Tune per this vertical's giro, e.g.:
+#   blocks:
+#     delivery_pickup:
+#       enabled_for: none
+blocks: {}
