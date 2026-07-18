@@ -56,7 +56,7 @@ VALID_BRAND_STYLES    = "sunny-paws,aqua-clean,sage-calm,warm-sand"
 # por coma — p.ej. el link USD y el MXN — para que todas las compras de esta
 # vertical se procesen, ignorando ventas de otros productos de la cuenta.
 # Vacío = filtro apagado (el worker loguea el plink observado para capturarlo).
-STRIPE_PAYMENT_LINK_ID = "plink_1TtvhdG4Nw60erBP9P6jrZM6,plink_1TtvjfG4Nw60erBPAjvz95od"
+STRIPE_PAYMENT_LINK_ID = "plink_1TtvhdG4Nw60erBP9P6jrZM6,plink_1TtvjfG4Nw60erBPAjvz95od,plink_1TuPyHG4Nw60erBPSTXvS2cF"
 GITHUB_REPO          = "yuyitov/pawcontact"
 GITHUB_ACTIONS_EVENT = "new-pawcontact-service-menu"
 TALLY_FORM_URL_EN    = "https://tally.so/r/zxo55M?order_id="
