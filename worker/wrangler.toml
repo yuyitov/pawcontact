@@ -73,6 +73,6 @@ WORKER_PUBLIC_URL    = "https://pawcontact-worker.veronica-perezarroyo.workers.d
 # el prospector publica el prefill.json de cada prospecto: el worker lee
 # `${base}/${slug}/prefill.json` y prellena los campos visibles del formulario de
 # Tally con los datos que ya recolectó, cuando la compra llegó por un link
-# rastreado (client_reference_id=<slug>). Déjala SIN definir si esta vertical no
-# tiene un prospector alimentándola — el prefill se apaga y el post-pago no cambia.
-# PROSPECT_PREFILL_BASE_URL = "https://tu-prospector.pages.dev/<vertical>/p"
+# rastreado (client_reference_id=<slug>). Configurada 2026-07-18 (P7): el
+# prospector de Cory ya alimenta esta vertical (pawcontact-prospector).
+PROSPECT_PREFILL_BASE_URL = "https://pawcontact-prospector.pages.dev/p"
