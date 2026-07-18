@@ -37,15 +37,17 @@
  * - BRAND_TAGLINE = Service Menus for Small Businesses (email footer line)
  * - GITHUB_REPO = yuyitov/service-menu-app
  * - GITHUB_ACTIONS_EVENT = new-hmu-service-menu
- * - TALLY_FORM_URL_EN = https://tally.so/r/yPkN5X?order_id=
- * - TALLY_FORM_URL_ES = https://tally.so/r/MeyDpk?order_id=
+ * - TALLY_FORM_URL_EN = https://tally.so/r/zxo55M?order_id=
+ * - TALLY_FORM_URL_ES = https://tally.so/r/0QyRRB?order_id=
+ *   (además del link de intake, de aquí se deriva el idioma del form que el
+ *   cliente llenó — fallback de default_language; ver tallyFormLang)
  * - FROM_EMAIL = HMU Link <hello@hmulink.com>
  * - PUBLIC_BOOK_BASE_URL = https://www.hmulink.com
  *
  * Secrets (in Cloudflare):
  * - STRIPE_WEBHOOK_SECRET
- * - TALLY_SIGNING_SECRET_EN (form yPkN5X has its own signing secret)
- * - TALLY_SIGNING_SECRET_ES (form MeyDpk has its own signing secret)
+ * - TALLY_SIGNING_SECRET_EN (form zxo55M has its own signing secret)
+ * - TALLY_SIGNING_SECRET_ES (form 0QyRRB has its own signing secret)
  * - GITHUB_TOKEN
  * - SENDGRID_API_KEY
  * - NOTIFY_SECRET
@@ -55,7 +57,7 @@
  */
 
 import { classifyStripeEvent } from './stripe-filter.mjs';
-import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery } from './product-config.mjs';
+import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, resolveDefaultLanguage } from './product-config.mjs';
 // Mapa campo-público -> alias de título del intake de Tally, única fuente de
 // verdad compartida con create_tally_forms.py --check-mapping (ver el archivo).
 // Es config por vertical: export_vertical.py copia este JSON a cada repo, así
@@ -1494,7 +1496,7 @@ function normalizePrimaryCta(value) {
   return aliases[normalized] || '';
 }
 
-// Mapea las respuestas del intake (formularios EN yPkN5X y ES MeyDpk) al
+// Mapea las respuestas del intake (formularios EN/ES de la vertical) al
 // payload público que consume el generador. SOLO campos públicos aprobados:
 // los datos internos (nombre de contacto, teléfono privado, notas "keep off")
 // se quedan en KV y nunca se despachan a GitHub Actions.
@@ -1517,11 +1519,12 @@ function buildPublicPayload(normalized, orderId, env) {
     brandStyle = fallbackBrandStyle(validStyles);
   }
 
-  const langRaw = answerAny(a, FIELD_ALIASES.default_language).toLowerCase();
-  let defaultLanguage;
-  if (langRaw.includes('espa') || langRaw.includes('span')) defaultLanguage = 'es';
-  else if (langRaw.includes('engl') || langRaw.includes('ingl')) defaultLanguage = 'en';
-  else defaultLanguage = normalized.form_id === 'MeyDpk' ? 'es' : 'en';
+  // Regla del idioma (Fase 2.6 del motor): respuesta explícita del cliente >
+  // idioma del formulario que llenó (form_id vs TALLY_FORM_URL_ES/EN, ver
+  // tallyFormLang) > 'en'. Antes el fallback comparaba contra 'MeyDpk' (el
+  // form ES de HMU, hardcodeado) y todo intake ES de PawContact caía a inglés.
+  const langRaw = answerAny(a, FIELD_ALIASES.default_language);
+  const defaultLanguage = resolveDefaultLanguage(langRaw, env, normalized.form_id);
 
   const businessName = answerAny(a, FIELD_ALIASES.business_name);
   const suffix = String(normalized.submission_id || orderId || '')

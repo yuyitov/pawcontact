@@ -30,6 +30,37 @@ export function brandDomain(env) {
   return (env.PUBLIC_BOOK_BASE_URL || 'https://www.hmulink.com').trim().replace(/^https?:\/\//, '');
 }
 
+// Idioma del formulario de Tally al que corresponde un form_id, derivado de las
+// env vars TALLY_FORM_URL_ES/EN (formato `https://tally.so/r/<FORM_ID>?order_id=`)
+// que este worker ya tiene. Antes buildPublicPayload hardcodeaba 'MeyDpk' (el
+// form ES de HMU) como fallback, así que en esta vertical el form_id nunca
+// coincidía y TODO caía a inglés (bug real: cliente llenó el form ES 0QyRRB y
+// su página salió en 'en'). Devuelve 'es'/'en' si el form_id es el de ESTA
+// vertical, o null si no se reconoce (el caller decide el último recurso).
+// Nunca lanza. (Fase 2.6 del motor de la fábrica.)
+export function tallyFormLang(env, formId) {
+  const id = String(formId || '').trim();
+  if (!id) return null;
+  const idFromUrl = (url) => {
+    const m = String(url || '').match(/tally\.so\/r\/([A-Za-z0-9]+)/);
+    return m ? m[1] : null;
+  };
+  if (idFromUrl(env && env.TALLY_FORM_URL_ES) === id) return 'es';
+  if (idFromUrl(env && env.TALLY_FORM_URL_EN) === id) return 'en';
+  return null;
+}
+
+// Regla completa del idioma por defecto de la página del cliente (decisión de
+// Vero, 2026-07-17): (1) respuesta explícita del cliente a la pregunta de
+// idioma → esa manda; (2) sin respuesta, el idioma del formulario que llenó
+// (tallyFormLang); (3) último recurso → 'en'.
+export function resolveDefaultLanguage(langRaw, env, formId) {
+  const raw = String(langRaw || '').toLowerCase();
+  if (raw.includes('espa') || raw.includes('span')) return 'es';
+  if (raw.includes('engl') || raw.includes('ingl')) return 'en';
+  return tallyFormLang(env, formId) || 'en';
+}
+
 export function emailFooterHtml(env) {
   return `${brandName(env)} — ${brandTagline(env)}`;
 }
