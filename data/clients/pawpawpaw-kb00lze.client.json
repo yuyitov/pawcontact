@@ -1,0 +1,158 @@
+{
+  "public_slug": "pawpawpaw-kb00lze",
+  "default_language": "en",
+  "brand_style": "warm-sand",
+  "business_type": "pets",
+  "business_name": "pawpawpaw",
+  "logo_url": "https://www.pawcontact.com/links/pawpawpaw-kb00lze/assets/logo.png",
+  "primary_image_url": "https://www.pawcontact.com/links/pawpawpaw-kb00lze/assets/gallery-1.jpg",
+  "gallery_images": [
+    {
+      "url": "https://www.pawcontact.com/links/pawpawpaw-kb00lze/assets/gallery-1.jpg"
+    },
+    {
+      "url": "https://www.pawcontact.com/links/pawpawpaw-kb00lze/assets/gallery-2.jpg"
+    }
+  ],
+  "whatsapp": "+523221553952",
+  "phone": "+523221553952",
+  "public_email": "hola@pawpawpaw.mx",
+  "instagram": "https://www.instagram.com/pawpawpaw",
+  "facebook": "https://www.facebook.com/pawpawpaw",
+  "tiktok": "https://www.tiktok.com/@pawpawpaw",
+  "website": "https://www.google.com",
+  "booking_url": "https://www.airbnb.com",
+  "primary_cta": "phone",
+  "google_maps_url": "https://www.google.com/maps",
+  "google_reviews_url": "https://www.google.com/maps",
+  "other_public_link": null,
+  "delivery_pickup_links": [
+    {
+      "label": "Pet taxi a domicilio —",
+      "url": "https://wa.me/523221553952"
+    }
+  ],
+  "portfolio_link": {
+    "label": "",
+    "url": "https://www.instagram.com/pawpawpaw"
+  },
+  "content": {
+    "es": {
+      "short_description": "Estética canina con baño, corte y spa para consentir a tu perrito. Atención con cariño y citas el mismo día.",
+      "address": "Av. de los Insurgentes 123, Col. Centro, Puerto Vallarta, Jalisco",
+      "opening_hours_text": "Lunes a Sábado 9:00–19:00 · Domingo cerrado",
+      "service_area_text": "",
+      "client_care_text": "",
+      "reservations_text": "",
+      "class_schedule_text": "",
+      "tour_details_text": "",
+      "pet_notes_text": "Trae su cartilla de vacunación.",
+      "price_display": "show",
+      "service_categories": [
+        "Servicios"
+      ],
+      "services": [
+        {
+          "category": "Servicios",
+          "name": "Baño y corte",
+          "price_label": "desde $350 MXN"
+        },
+        {
+          "category": "Servicios",
+          "name": "Baño sencillo",
+          "price_label": "desde $200 MXN"
+        },
+        {
+          "category": "Servicios",
+          "name": "Corte de uñas",
+          "price_label": "desde $80 MXN"
+        },
+        {
+          "category": "Servicios",
+          "name": "Deslanado",
+          "price_label": "desde $250 MXN"
+        },
+        {
+          "category": "Servicios",
+          "name": "Spa completo (baño, corte, uñas y oídos)",
+          "price_label": "desde $500 MXN"
+        }
+      ],
+      "policies": [
+        "Agenda con 24 h de anticipación. Cancelaciones el mismo día tienen cargo del 50%. Tu mascota debe estar desparasitada y con vacunas al día."
+      ],
+      "faq": [
+        {
+          "question": "¿Cuánto dura el servicio?",
+          "answer": "Entre 1 y 2 horas según tamaño y pelaje. ¿Atienden razas grandes? Sí, todas las razas. ¿Puedo esperar a mi perrito? Sí, tenemos sala de espera."
+        }
+      ],
+      "featured_package": {
+        "name": "Promo de bienvenida: 15% de descuento en tu primer baño y corte. Reserva por WhatsApp.",
+        "description": ""
+      }
+    },
+    "en": {
+      "short_description": "Estética canina con baño, corte y spa para consentir a tu perrito. Atención con cariño y citas el mismo día.",
+      "address": "Av. de los Insurgentes 123, Col. Centro, Puerto Vallarta, Jalisco",
+      "opening_hours_text": "Lunes a Sábado 9:00–19:00 · Domingo cerrado",
+      "service_area_text": "",
+      "client_care_text": "",
+      "reservations_text": "",
+      "class_schedule_text": "",
+      "tour_details_text": "",
+      "pet_notes_text": "Trae su cartilla de vacunación.",
+      "price_display": "show",
+      "service_categories": [
+        "Services"
+      ],
+      "services": [
+        {
+          "category": "Services",
+          "name": "Baño y corte",
+          "price_label": "desde $350 MXN"
+        },
+        {
+          "category": "Services",
+          "name": "Baño sencillo",
+          "price_label": "desde $200 MXN"
+        },
+        {
+          "category": "Services",
+          "name": "Corte de uñas",
+          "price_label": "desde $80 MXN"
+        },
+        {
+          "category": "Services",
+          "name": "Deslanado",
+          "price_label": "desde $250 MXN"
+        },
+        {
+          "category": "Services",
+          "name": "Spa completo (baño, corte, uñas y oídos)",
+          "price_label": "desde $500 MXN"
+        }
+      ],
+      "policies": [
+        "Agenda con 24 h de anticipación. Cancelaciones el mismo día tienen cargo del 50%. Tu mascota debe estar desparasitada y con vacunas al día."
+      ],
+      "faq": [
+        {
+          "question": "¿Cuánto dura el servicio?",
+          "answer": "Entre 1 y 2 horas según tamaño y pelaje. ¿Atienden razas grandes? Sí, todas las razas. ¿Puedo esperar a mi perrito? Sí, tenemos sala de espera."
+        }
+      ],
+      "featured_package": {
+        "name": "Promo de bienvenida: 15% de descuento en tu primer baño y corte. Reserva por WhatsApp.",
+        "description": ""
+      }
+    }
+  },
+  "locations": [
+    {
+      "name": "",
+      "address": "Av. de los Insurgentes 123, Col. Centro, Puerto Vallarta, Jalisco",
+      "google_maps_url": "https://www.google.com/maps"
+    }
+  ]
+}
