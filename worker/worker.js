@@ -25,7 +25,7 @@
  * d. Correcciones adicionales ($3 USD / $40 MXN, sección 3/6 de los Términos):
  *    GET /buy-correction?slug=… crea un Stripe Checkout Session (requiere el
  *    secret STRIPE_SECRET_KEY; sin él redirige a la página de contacto). El
- *    webhook detecta metadata hmu_correction=1, acuña un token nuevo y se lo
+ *    webhook detecta metadata pawcontact_correction=1, acuña un token nuevo y se lo
  *    manda por correo al email del pedido original (nunca al comprador si no
  *    coincide — pagar por la página de otro solo le regala la corrección).
  *
@@ -861,7 +861,9 @@ async function handleBuyCorrection(url, env) {
     'line_items[0][price_data][product_data][name]',
     lang === 'es' ? `${brandName(env)} — Corrección adicional` : `${brandName(env)} — Extra correction`
   );
-  params.set('metadata[hmu_correction]', '1');
+  // Metadata PROPIA de esta vertical — stripe-filter.mjs detecta esta misma
+  // key en el webhook (cuenta de Stripe compartida; ver nota ahí).
+  params.set('metadata[pawcontact_correction]', '1');
   params.set('metadata[slug]', slug);
   params.set('success_url', `${baseUrl}/correct/thanks/?l=${lang}`);
   params.set('cancel_url', `${baseUrl}/links/${slug}/`);

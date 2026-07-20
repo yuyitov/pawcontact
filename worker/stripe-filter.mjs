@@ -72,7 +72,10 @@ export function classifyStripeEvent(event, env) {
   // Compras de corrección adicional: son Checkout Sessions creadas por este
   // mismo worker en /buy-correction (no payment links), marcadas con metadata.
   // Se atienden ANTES del filtro de payment_link — no traen payment_link.
-  if (type === 'checkout.session.completed' && session?.metadata?.hmu_correction === '1') {
+  // Key PROPIA de esta vertical (la cuenta de Stripe se comparte con HMU y
+  // otros productos: heredar hmu_correction hacía que HMU y PawContact se
+  // procesaran las correcciones mutuamente; mismo patrón que ModaLink/Dr Link).
+  if (type === 'checkout.session.completed' && session?.metadata?.pawcontact_correction === '1') {
     return { action: 'correction', type, session };
   }
 
