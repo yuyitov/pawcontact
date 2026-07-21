@@ -1,10 +1,10 @@
 name: pages
 
-# Publica public/ (landing EN/ES, legales, /correct/ y las 4 demos) en GitHub
-# Pages. NO usa secrets. Adaptado del pages.yml de HMU Link (service-menu-app),
-# que es la instancia de referencia: mismos checks, ajustado a esta vertical
-# (4 demos en vez de 12; sin el check de MyGuest, que es herencia de HMU).
-# El dominio propio lo fija public/CNAME (www.pawcontact.com).
+# Publica public/ (landing EN/ES, legales, /correct/ y las demos) en GitHub
+# Pages. NO usa secrets. Plantilla del motor link-factory, generada para
+# PawContact: mismos checks que la instancia de referencia (HMU Link),
+# ajustados a esta vertical.
+# El dominio propio lo fija public/CNAME.
 
 on:
   push:
@@ -47,7 +47,7 @@ jobs:
       - name: Verify expected outputs exist (index.html + qr.svg per demo)
         run: |
           set -e
-          demos="veterinaria-altavida spa-de-patas hotel-colitas boutique-bigotes"
+          demos="boutique-bigotes hotel-colitas spa-de-patas veterinaria-altavida"
           missing=0
           for slug in $demos; do
             for asset in index.html qr.svg; do
@@ -62,7 +62,7 @@ jobs:
             echo "Faltan archivos esperados."
             exit 1
           fi
-          echo "OK: las 4 demos tienen index.html y qr.svg."
+          echo "OK: todas las demos tienen index.html y qr.svg."
 
       - name: Verify the storefront exists (landing EN/ES + legales + correct)
         run: |
@@ -91,11 +91,11 @@ jobs:
 
       - name: Verify no placeholder URLs left in the storefront
         run: |
-          # Los placeholders de Etapa B (checkout de Stripe, URL del worker) se
-          # rellenan en B3/B4. Si alguno sobrevive al deploy, la tienda queda
-          # rota en silencio: el boton de comprar no compra.
+          # Los placeholders de la tienda (checkout de Stripe, URL del worker) se
+          # rellenan al configurar la vertical. Si alguno sobrevive al deploy, la
+          # tienda queda rota en silencio: el boton de comprar no compra.
           if grep -rn "TODO_STRIPE_CHECKOUT\|TODO_WORKER_URL" public/ ; then
-            echo "Quedan placeholders sin rellenar en la tienda (ver Etapa B, pasos B3/B4)."
+            echo "Quedan placeholders sin rellenar en la tienda."
             exit 1
           fi
           echo "OK: sin placeholders pendientes."

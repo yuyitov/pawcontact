@@ -43,6 +43,10 @@ id      = "bb9e4cced7104907adb5132c8ddcde7d"
 # hmu_correction, …). Distinto por vertical aunque cada una tenga su propio
 # KV namespace — así el prefijo nunca es ambiguo si alguna vez se comparte uno.
 PRODUCT_ID           = "pawcontact"
+# Modificaciones GRATIS incluidas en la compra. Es el MISMO número que imprimen
+# los Términos publicados (legal.free_changes de vertical.yaml) — si los dos no
+# coinciden, el producto promete por escrito algo que el worker no entrega.
+FREE_CHANGES          = "2"
 # Marca usada en asuntos/cuerpos/footers de los correos.
 BRAND_NAME            = "PawContact"
 BRAND_TAGLINE          = "Service menus for pet businesses"
