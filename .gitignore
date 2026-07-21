@@ -8,3 +8,4 @@ worker/.wrangler/
 .env.*
 *.local
 .engine-only-backup/
+.store-only-backup/
