@@ -102,7 +102,17 @@ jobs:
             payload=$(jq -nc --arg slug "$SLUG" --arg cid "$CORRECTION_ID" --arg st "${CORRECTION_STATUS:-manual}" \
               '{slug:$slug,correction_id:$cid,correction_status:$st}')
           else
-            payload=$(jq -nc --arg slug "$SLUG" --arg sid "$SUBMISSION_ID" '{slug:$slug,submission_id:$sid}')
+            # QR en base64 para que el worker lo adjunte inline en el correo de
+            # entrega. Va por el body y no por URL porque cuando se dispara
+            # /notify, Cloudflare Pages todavía no publicó el asset: el worker no
+            # podría descargarlo. Si el archivo no existe, QR_B64 queda vacío y el
+            # correo sale sin QR (fail-open, nunca bloquea la entrega).
+            QR_B64=""
+            if [ -f "public/links/$SLUG/qr.png" ]; then
+              QR_B64=$(base64 -w0 "public/links/$SLUG/qr.png")
+            fi
+            payload=$(jq -nc --arg slug "$SLUG" --arg sid "$SUBMISSION_ID" --arg qr "$QR_B64" \
+              '{slug:$slug,submission_id:$sid,qr_png_base64:$qr}')
           fi
           curl -sS -X POST "$WORKER_URL/notify" \
             -H "Authorization: Bearer $NOTIFY_SECRET" \

@@ -54,3 +54,27 @@ strings_overrides:
 blocks:
   portfolio:
     enabled_for: all
+
+# Datos legales de la vertical (Ola 1b). Los consumen las plantillas de
+# engine/store/legal/*.md (Terminos y Aviso de Privacidad, ES/EN) y el
+# generador, que inserta `disclaimers` en el pie de las paginas de cliente
+# para que no puedan removerse a mano. Schema y defaults:
+# engine/generator/vertical_config.py -> LEGAL_DEFAULTS.
+#
+# Lo que NO declares usa el default de la casa: refund_days 7 (politica unica
+# decidida por Vero el 2026-07-20: 7 dias naturales desde la publicacion +
+# retiro inmediato de la pagina), support_email hello@<dominio>, cfdi a
+# solicitud, jurisdiccion Estados Unidos Mexicanos.
+legal:
+  responsable: "Verónica Pérez Arroyo"
+  domicilio_fiscal: "Virgen 5552, Arboledas, Zapopan, Jalisco, C.P. 45070, México"
+  updated:
+    es: "20 de julio de 2026"
+    en: "July 20, 2026"
+  # Avisos bilingues que el generador imprime en las paginas de cliente y en
+  # los Terminos. PawContact no publica ninguno hoy (hallazgo #14 de la
+  # auditoria); si Vero decide agregar uno (p. ej. veterinarias), va aqui:
+  #   disclaimers:
+  #     - es: "Esta pagina es informativa y no sustituye una consulta veterinaria."
+  #       en: "This page is informational and does not replace veterinary care."
+  disclaimers: []
