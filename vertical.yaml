@@ -71,10 +71,13 @@ legal:
   updated:
     es: "20 de julio de 2026"
     en: "July 20, 2026"
-  # Avisos bilingues que el generador imprime en las paginas de cliente y en
-  # los Terminos. PawContact no publica ninguno hoy (hallazgo #14 de la
-  # auditoria); si Vero decide agregar uno (p. ej. veterinarias), va aqui:
-  #   disclaimers:
-  #     - es: "Esta pagina es informativa y no sustituye una consulta veterinaria."
-  #       en: "This page is informational and does not replace veterinary care."
-  disclaimers: []
+  # Avisos bilingues que el generador imprime en el pie de cada pagina de
+  # cliente y en los Terminos (hallazgo #14 de la auditoria). Recuperado en la
+  # Ola 2 (2026-07-20, decision de Vero): los Terminos hechos a mano de
+  # PawContact responsabilizaban al negocio de las reglas profesionales de su
+  # giro y la plantilla estandar no lo traia. Esta redactado hacia AFUERA
+  # porque quien lee el pie de la pagina publica es el dueno de la mascota, no
+  # el anunciante.
+  disclaimers:
+    - es: "Información publicada por el negocio anunciante. Los servicios veterinarios y otros servicios regulados son su responsabilidad profesional; PawContact no verifica credenciales ni licencias."
+      en: "Information published by the advertising business. Veterinary and other regulated services are its professional responsibility; PawContact does not verify credentials or licenses."
