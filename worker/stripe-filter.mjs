@@ -19,6 +19,8 @@
  * `node --test` sin montar un Worker ni un KV.
  */
 
+import { correctionMetadataKey } from './product-config.mjs';
+
 // Solo estos dos tipos de evento pueden corresponder a una venta. Únicamente
 // `checkout.session.completed` acarrea `payment_link` (atribuible a un
 // producto); `payment_intent.succeeded` no se puede atribuir, así que con el
@@ -72,10 +74,11 @@ export function classifyStripeEvent(event, env) {
   // Compras de corrección adicional: son Checkout Sessions creadas por este
   // mismo worker en /buy-correction (no payment links), marcadas con metadata.
   // Se atienden ANTES del filtro de payment_link — no traen payment_link.
-  // Key PROPIA de esta vertical (la cuenta de Stripe se comparte con HMU y
-  // otros productos: heredar hmu_correction hacía que HMU y PawContact se
-  // procesaran las correcciones mutuamente; mismo patrón que ModaLink/Dr Link).
-  if (type === 'checkout.session.completed' && session?.metadata?.pawcontact_correction === '1') {
+  // La key es por vertical (correctionMetadataKey: <PRODUCT_ID>_correction,
+  // default hmu_correction) — la cuenta de Stripe se comparte, así que un
+  // literal fijo haría que dos verticales se procesaran las correcciones
+  // mutuamente (bug real HMU↔PawContact, ronda 4 de deuda del worker).
+  if (type === 'checkout.session.completed' && session?.metadata?.[correctionMetadataKey(env)] === '1') {
     return { action: 'correction', type, session };
   }
 

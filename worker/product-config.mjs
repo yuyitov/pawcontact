@@ -30,14 +30,111 @@ export function brandDomain(env) {
   return (env.PUBLIC_BOOK_BASE_URL || 'https://www.hmulink.com').trim().replace(/^https?:\/\//, '');
 }
 
+// Identidad de ESTE worker (no de la marca pública): usada en /health y en el
+// User-Agent que dispatchGitHubAction manda a la API de GitHub — nunca la ve un
+// cliente. Antes 'service-menu-worker' estaba hardcodeado en worker.js, así que
+// una vertical exportada (p.ej. PawContact) reportaba una identidad ajena.
+// Default = mismo literal de siempre (comportamiento actual de HMU intacto).
+// export_vertical.py ya resuelve WORKER_NAME (= "<vertical_id>-worker") para el
+// `name` de wrangler.toml; declararlo también en [vars] lo expone a env.
+export function workerName(env) {
+  return (env.WORKER_NAME || 'service-menu-worker').trim();
+}
+
+// Metadata key con la que ESTE worker marca en Stripe las Checkout Sessions de
+// compra de corrección adicional (/buy-correction) y con la que el webhook /
+// stripe-filter.mjs las reconoce de vuelta. Antes era el literal hmu_correction
+// en los dos lados — y como la cuenta de Stripe se COMPARTE entre productos,
+// una vertical exportada que heredara el literal colisionaba con HMU: cada
+// compra de corrección de una la procesaba (también) la otra. Se deriva de
+// PRODUCT_ID (mismo namespacing que kvKey): "<PRODUCT_ID>_correction", con
+// default hmu_correction si PRODUCT_ID no está configurado — cero cambio de
+// comportamiento para el deploy real de HMU. Debe usarse en AMBOS lados
+// (crear el checkout y detectarlo), nunca volver al literal (hay test de
+// regresión que lo prohíbe fuera de este default).
+export function correctionMetadataKey(env) {
+  const productId = ((env && env.PRODUCT_ID) || 'hmu').trim();
+  return `${productId}_correction`;
+}
+
+// Modificaciones GRATIS incluidas en la compra. Estándar de la casa decidido
+// por Vero el 2026-07-20: 2 (antes 1). Se configura por vertical en
+// vertical.yaml (`legal.free_changes`), que el export vuelca a FREE_CHANGES en
+// wrangler.toml — así los Términos publicados y lo que el worker realmente
+// entrega salen del MISMO número y no pueden divergir.
+export const DEFAULT_FREE_CHANGES = 2;
+
+export function freeChanges(env) {
+  const raw = Number.parseInt(String((env && env.FREE_CHANGES) ?? '').trim(), 10);
+  if (!Number.isInteger(raw) || raw < 0) return DEFAULT_FREE_CHANGES;
+  return Math.min(raw, 10);
+}
+
+// Tope del base64 que se acepta para adjuntar inline en un correo (~75 KB de
+// PNG). Un QR de segno pesa ~1-3 KB; el tope existe para que un body raro no
+// haga que SendGrid rechace el envío entero y el cliente se quede sin entrega.
+export const MAX_INLINE_IMAGE_BASE64 = 100000;
+
+// Valida base64 "puro" (sin data: URI, sin saltos de línea) para adjuntos de
+// correo. Devuelve la cadena limpia o '' — nunca lanza: el QR es un extra, la
+// entrega no puede caerse por él.
+export function sanitizeBase64Image(value, maxLen = MAX_INLINE_IMAGE_BASE64) {
+  const raw = typeof value === 'string' ? value.trim() : '';
+  if (!raw || raw.length > maxLen) return '';
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(raw) ? raw : '';
+}
+
+// Idioma del correo post-pago a partir de la moneda del checkout de Stripe.
+// MXN -> español, USD -> inglés, CUALQUIER OTRA -> null = correo BILINGÜE.
+// Antes el motor hacía `currency === 'mxn' ? 'es' : 'en'`, así que un comprador
+// en CAD o EUR recibía inglés a secas por descarte; My Guest ya vende en CAD.
+// Con null, quien arma el correo manda las dos versiones y el cliente elige
+// (mismo criterio que ModaLink, la mejor implementación de la auditoría §7.11).
+export function emailLangFromCurrency(currency) {
+  const normalized = String(currency || '').trim().toLowerCase();
+  if (normalized === 'mxn') return 'es';
+  if (normalized === 'usd') return 'en';
+  return null;
+}
+
+// Sin acentos, minúsculas, todo lo no-alfanumérico -> '_' — MISMA normalización
+// que create_tally_forms.py::nk() en Python (regla fija: los dos deben coincidir
+// byte a byte o el check-mapping y el worker divergen sobre qué título matchea).
+// Vive aquí (no en worker.js) porque languageQuestionAliases() la necesita y este
+// módulo es el que se testea con node --test sin tocar KV/red.
+export function normalizeKey(key) {
+  return String(key || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+// Alias de la pregunta explícita de idioma, derivados de BRAND_NAME en vez de
+// vivir como literal fijo en tally-field-aliases.json. Antes ese JSON —
+// compartido/copiado verbatim a cada vertical por export_vertical.py — traía
+// hardcodeado 'hmu_link' ("...your hmu link show first"), así que una vertical
+// nueva que SÍ preguntara el idioma explícitamente (p.ej. "your PawContact")
+// nunca hubiera matcheado sin editar el JSON a mano. Con BRAND_NAME="HMU Link"
+// esto reproduce EXACTO los dos alias históricos (ver test de paridad).
+export function languageQuestionAliases(env) {
+  const slug = normalizeKey(brandName(env));
+  return [
+    `which_language_should_your_${slug}_show_first`,
+    `en_que_idioma_debe_aparecer_primero_tu_${slug}`
+  ];
+}
+
 // Idioma del formulario de Tally al que corresponde un form_id, derivado de las
 // env vars TALLY_FORM_URL_ES/EN (formato `https://tally.so/r/<FORM_ID>?order_id=`)
-// que este worker ya tiene. Antes buildPublicPayload hardcodeaba 'MeyDpk' (el
-// form ES de HMU) como fallback, así que en esta vertical el form_id nunca
-// coincidía y TODO caía a inglés (bug real: cliente llenó el form ES 0QyRRB y
-// su página salió en 'en'). Devuelve 'es'/'en' si el form_id es el de ESTA
-// vertical, o null si no se reconoce (el caller decide el último recurso).
-// Nunca lanza. (Fase 2.6 del motor de la fábrica.)
+// que TODO worker ya tiene. Antes buildPublicPayload hardcodeaba 'MeyDpk' (el
+// form ES de HMU) como fallback, así que en cualquier vertical exportada el
+// form_id nunca coincidía y TODO caía a inglés (bug real de PawContact: cliente
+// llenó el form ES 0QyRRB y su página salió en 'en'). Devuelve 'es'/'en' si el
+// form_id es el de ESA vertical, o null si no se reconoce (el caller decide el
+// último recurso). Nunca lanza.
 export function tallyFormLang(env, formId) {
   const id = String(formId || '').trim();
   if (!id) return null;
@@ -53,7 +150,8 @@ export function tallyFormLang(env, formId) {
 // Regla completa del idioma por defecto de la página del cliente (decisión de
 // Vero, 2026-07-17): (1) respuesta explícita del cliente a la pregunta de
 // idioma → esa manda; (2) sin respuesta, el idioma del formulario que llenó
-// (tallyFormLang); (3) último recurso → 'en'.
+// (tallyFormLang); (3) último recurso → 'en'. Vive aquí (no en worker.js) para
+// testearse con node --test sin tocar KV/red, igual que el resto del módulo.
 export function resolveDefaultLanguage(langRaw, env, formId) {
   const raw = String(langRaw || '').toLowerCase();
   if (raw.includes('espa') || raw.includes('span')) return 'es';

@@ -22,10 +22,12 @@
  *    edita data/clients/<slug>.client.json y regenera la página; Actions llama
  *    /notify con correction_id + correction_status (applied|manual) y aquí se
  *    manda el correo de confirmación (y copia a REPLY_TO_EMAIL).
- * d. Correcciones adicionales ($3 USD / $40 MXN, sección 3/6 de los Términos):
+ * d. Correcciones adicionales ($6 USD / $59 MXN, sección 3/6 de los Términos):
  *    GET /buy-correction?slug=… crea un Stripe Checkout Session (requiere el
  *    secret STRIPE_SECRET_KEY; sin él redirige a la página de contacto). El
- *    webhook detecta metadata pawcontact_correction=1, acuña un token nuevo y se lo
+ *    webhook detecta la metadata de corrección de ESTA vertical
+ *    (correctionMetadataKey: <PRODUCT_ID>_correction=1; para HMU,
+ *    hmu_correction=1), acuña un token nuevo y se lo
  *    manda por correo al email del pedido original (nunca al comprador si no
  *    coincide — pagar por la página de otro solo le regala la corrección).
  *
@@ -37,8 +39,8 @@
  * - BRAND_TAGLINE = Service Menus for Small Businesses (email footer line)
  * - GITHUB_REPO = yuyitov/service-menu-app
  * - GITHUB_ACTIONS_EVENT = new-hmu-service-menu
- * - TALLY_FORM_URL_EN = https://tally.so/r/zxo55M?order_id=
- * - TALLY_FORM_URL_ES = https://tally.so/r/0QyRRB?order_id=
+ * - TALLY_FORM_URL_EN = https://tally.so/r/<FORM_ID_EN>?order_id=
+ * - TALLY_FORM_URL_ES = https://tally.so/r/<FORM_ID_ES>?order_id=
  *   (además del link de intake, de aquí se deriva el idioma del form que el
  *   cliente llenó — fallback de default_language; ver tallyFormLang)
  * - FROM_EMAIL = HMU Link <hello@hmulink.com>
@@ -46,8 +48,8 @@
  *
  * Secrets (in Cloudflare):
  * - STRIPE_WEBHOOK_SECRET
- * - TALLY_SIGNING_SECRET_EN (form zxo55M has its own signing secret)
- * - TALLY_SIGNING_SECRET_ES (form 0QyRRB has its own signing secret)
+ * - TALLY_SIGNING_SECRET_EN (the EN form has its own signing secret)
+ * - TALLY_SIGNING_SECRET_ES (the ES form has its own signing secret)
  * - GITHUB_TOKEN
  * - SENDGRID_API_KEY
  * - NOTIFY_SECRET
@@ -57,7 +59,7 @@
  */
 
 import { classifyStripeEvent } from './stripe-filter.mjs';
-import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, resolveDefaultLanguage } from './product-config.mjs';
+import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges } from './product-config.mjs';
 // Mapa campo-público -> alias de título del intake de Tally, única fuente de
 // verdad compartida con create_tally_forms.py --check-mapping (ver el archivo).
 // Es config por vertical: export_vertical.py copia este JSON a cada repo, así
@@ -66,6 +68,8 @@ import FIELD_ALIASES from './tally-field-aliases.json';
 
 // Precio de la corrección adicional — DEBE coincidir con la sección 3 de los
 // Términos publicados (public/terms/ y public/es/terminos/): $6 USD / $59 MXN.
+// (Auditoría 2026-07: el código cobraba $3/$40, valores viejos anteriores a
+// los Términos vigentes — unit_amount va en centavos.)
 const CORRECTION_PRICE = {
   usd: { unit_amount: 600, label: '$6 USD' },
   mxn: { unit_amount: 5900, label: '$59 MXN' }
@@ -102,7 +106,7 @@ export default {
       const minuteSlot = Math.floor(Date.now() / 60000);
 
       if (request.method === 'GET' && pathname === '/health') {
-        return jsonResponse({ ok: true, worker: 'service-menu-worker' });
+        return jsonResponse({ ok: true, worker: workerName(env) });
       }
 
       if (request.method === 'POST' && pathname === '/stripe/webhook') {
@@ -302,16 +306,19 @@ async function handleStripeWebhook(request, env) {
   // Send post-payment email. Asunto en el idioma del comprador (moneda MXN →
   // español): un asunto en inglés a un cliente mexicano confunde y dispara
   // filtros de spam por incongruencia de idioma.
-  const isMxnBuyer = currency.toLowerCase() === 'mxn';
+  // MXN -> es, USD -> en, cualquier otra moneda -> null = correo bilingüe
+  // (antes toda moneda != MXN caía a inglés por descarte).
+  const emailLang = emailLangFromCurrency(currency);
+  const subjectES = `Completa tu página ${brandName(env)} — solo falta un formulario`;
+  const subjectEN = `Complete your ${brandName(env)} service menu — one form to go`;
   try {
     await sendEmail({
       env,
       to: customerEmail,
-      subject: isMxnBuyer
-        ? `Completa tu página ${brandName(env)} — solo falta un formulario`
-        : `Complete your ${brandName(env)} service menu — one form to go`,
-      html: buildPostPaymentEmail({ formUrlEN, formUrlES, lang: isMxnBuyer ? 'es' : 'en', env }),
-      text: buildPostPaymentText({ formUrlEN, formUrlES, lang: isMxnBuyer ? 'es' : 'en', env })
+      subject: emailLang === 'es' ? subjectES : emailLang === 'en' ? subjectEN
+        : `${subjectES} / ${subjectEN}`,
+      html: buildPostPaymentEmail({ formUrlEN, formUrlES, lang: emailLang, env }),
+      text: buildPostPaymentText({ formUrlEN, formUrlES, lang: emailLang, env })
     });
   } catch (err) {
     console.error('post-payment email failed:', safeError(err));
@@ -415,9 +422,30 @@ async function handleTallyWebhook(request, env) {
     return jsonResponse({ ok: false, status: 'invalid_order_id' }, 403);
   }
 
-  // Check order state: only allow generation from 'paid' status
+  // ¿Es una MODIFICACIÓN de una página ya publicada? (Ola 1c) El formulario
+  // llega con los hidden client_slug + correction_token que puso el enlace de
+  // modificación. Se valida el token ANTES de nada: sin token válido, un envío
+  // con client_slug sería una vía para reescribir la página de otro.
+  const modification = await resolveModification(env, normalized, existingOrder);
+  if (modification.error) {
+    await env.SERVICE_MENU_KV.put(
+      kvKey(env, 'invalid_modification', incomingOrderId, normalized.submission_id),
+      JSON.stringify({
+        order_id: incomingOrderId,
+        submission_id: normalized.submission_id,
+        reason: modification.error,
+        attempted_at: now
+      }),
+      { expirationTtl: 2592000 }
+    ).catch(() => {});
+    return jsonResponse({ ok: false, status: 'invalid_modification', reason: modification.error }, 403);
+  }
+
+  // Check order state: only allow generation from 'paid' status. Una
+  // modificación llega con la orden ya 'delivered', así que se salta este gate
+  // (su gate es el token, ya validado arriba).
   const allowedStatuses = ['paid', 'form_sent'];
-  if (!allowedStatuses.includes(existingOrder.status)) {
+  if (!modification.token && !allowedStatuses.includes(existingOrder.status)) {
     await env.SERVICE_MENU_KV.put(
       kvKey(env, 'invalid_order_status', incomingOrderId, normalized.submission_id),
       JSON.stringify({ order_id: incomingOrderId, submission_id: normalized.submission_id, blocked_by_status: existingOrder.status, attempted_at: now }),
@@ -468,6 +496,13 @@ async function handleTallyWebhook(request, env) {
     return jsonResponse({ ok: false, status: 'incomplete_intake', missing: 'public_contact' }, 422);
   }
 
+  // En una modificación se CONSERVA el slug de la página existente: si se
+  // dejara el derivado del nombre del negocio + submission_id, cada
+  // modificación publicaría una página NUEVA y dejaría huérfana la que el
+  // cliente ya compartió. Es el riesgo principal de este flujo.
+  if (modification.slug) {
+    publicPayload.public_slug = modification.slug;
+  }
   const slug = publicPayload.public_slug;
 
   // Save submission to KV (full answers, private fields included — KV only)
@@ -479,6 +514,12 @@ async function handleTallyWebhook(request, env) {
       customer_email: orderEmail,
       slug,
       answers: normalized.answers,
+      // Lo que el cliente escribió, tal cual, keyed por field name de Tally:
+      // es lo que reconstruye SU formulario cuando pide una modificación.
+      prefill: normalized.prefill,
+      // Marca que este envío EDITA una página ya entregada: /notify lo usa para
+      // mandar el correo de "tu página fue actualizada" en vez del de entrega.
+      is_modification: Boolean(modification.token),
       received_at: now,
       status: 'received'
     }), { expirationTtl: 7776000 }); // 90 days
@@ -519,6 +560,26 @@ async function handleTallyWebhook(request, env) {
       updated_at: now
     }));
     return jsonResponse({ ok: false, error: 'Failed to dispatch generation' }, 500);
+  }
+
+  // Modificación despachada: recién ahora se quema el token (si el dispatch
+  // falla, el cliente puede reintentar con el mismo enlace) y se descuenta una
+  // de las incluidas, acuñando la siguiente si le quedan.
+  if (modification.token) {
+    try {
+      modification.record.used_at = now;
+      modification.record.submission_id = normalized.submission_id;
+      await env.SERVICE_MENU_KV.put(
+        kvKey(env, 'correction', modification.token),
+        JSON.stringify(modification.record),
+        { expirationTtl: 7776000 }
+      );
+      if (modification.record.paid !== true) {
+        await consumeFreeChange(env, slug, modification.record);
+      }
+    } catch (err) {
+      console.error('modification token burn failed:', safeError(err));
+    }
   }
 
   // Update order to 'generating'
@@ -571,12 +632,27 @@ async function handleNotify(request, env) {
   const slug = (body?.slug || '').trim();
   const submissionId = (body?.submission_id || '').trim();
   let orderId = (body?.order_id || '').trim();
+  // QR en base64 que manda el workflow (el asset todavía no está publicado
+  // cuando se dispara /notify, así que no se puede descargar). Fail-open: si no
+  // viene, viene mal formado o viene demasiado grande, el correo sale sin QR —
+  // nunca bloquea la entrega, que es lo que el cliente pagó.
+  const qrPngBase64 = sanitizeBase64Image(body?.qr_png_base64);
 
   // El workflow ya no conoce el order_id (no viaja en client_payload para no
   // aparecer en logs públicos de Actions); se resuelve desde la submission.
-  if (!orderId && submissionId) {
-    const submission = await env.SERVICE_MENU_KV.get(kvKey(env, 'submission', submissionId), { type: 'json' }).catch(() => null);
-    orderId = (submission?.order_id || '').trim();
+  let submissionRecord = null;
+  if (submissionId) {
+    submissionRecord = await env.SERVICE_MENU_KV.get(kvKey(env, 'submission', submissionId), { type: 'json' }).catch(() => null);
+  }
+  if (!orderId) {
+    orderId = (submissionRecord?.order_id || '').trim();
+  }
+
+  // Este envío EDITÓ una página ya entregada: el correo que toca es el de
+  // "tu página fue actualizada", no otra entrega (que además sería idempotente
+  // y no mandaría nada — el cliente se quedaría sin aviso).
+  if (submissionRecord?.is_modification && slug) {
+    return await notifyModificationApplied({ env, slug, orderId, submissionId });
   }
 
   if (!slug || !orderId) {
@@ -609,7 +685,10 @@ async function handleNotify(request, env) {
 
   // Idioma del cuerpo = idioma del comprador (moneda MXN → español), igual que
   // el asunto. Se guarda también en el token para los correos de corrección.
-  const deliveryLang = (order.currency || '').toLowerCase() === 'mxn' ? 'es' : 'en';
+  // Una moneda que no identifica idioma (CAD, EUR…) cae a inglés: aquí, a
+  // diferencia del correo post-pago, no se manda bilingüe porque este correo
+  // lleva la página YA generada en un idioma concreto.
+  const deliveryLang = emailLangFromCurrency(order.currency) || 'en';
 
   // Save correction token (la corrección gratuita incluida)
   try {
@@ -634,6 +713,11 @@ async function handleNotify(request, env) {
       customer_email: customerEmail,
       page_url: pageUrl,
       correction_token: correctionToken,
+      // Contador de modificaciones incluidas (FREE_CHANGES <- legal.free_changes).
+      // Se congela AQUÍ el total que le tocaba al cliente al comprar: si mañana
+      // la vertical cambia el número, quien ya compró conserva lo prometido.
+      free_total: freeChanges(env),
+      free_used: 0,
       status: 'delivered',
       delivered_at: new Date().toISOString()
     }), { expirationTtl: 7776000 }); // 90 days
@@ -646,7 +730,14 @@ async function handleNotify(request, env) {
     return jsonResponse({ ok: false, error: 'SENDGRID_API_KEY not configured' }, 500);
   }
 
-  const correctionUrl = correctionFormUrl(env, correctionToken, deliveryLang);
+  // Formulario completo prellenado si la vertical ya lo soporta; si no, la
+  // página de texto libre de siempre.
+  const correctionUrl = await bestModificationUrl(env, {
+    token: correctionToken,
+    slug,
+    lang: deliveryLang,
+    orderId
+  });
   try {
     await sendEmail({
       env,
@@ -659,9 +750,19 @@ async function handleNotify(request, env) {
         slug,
         lang: deliveryLang,
         correctionUrl,
+        hasQr: Boolean(qrPngBase64),
         env
       }),
-      text: buildDeliveryText({ pageUrl, lang: deliveryLang, correctionUrl, env })
+      text: buildDeliveryText({ pageUrl, lang: deliveryLang, correctionUrl, hasQr: Boolean(qrPngBase64), env }),
+      attachments: qrPngBase64
+        ? [{
+            content: qrPngBase64,
+            type: 'image/png',
+            filename: `${(env.PRODUCT_ID || 'hmu').trim()}-qr-${slug}.png`,
+            disposition: 'inline',
+            content_id: DELIVERY_QR_CID
+          }]
+        : []
     });
   } catch (err) {
     console.error('delivery email failed:', safeError(err));
@@ -689,9 +790,193 @@ async function handleNotify(request, env) {
 // CORRECTIONS — status, request, purchase, notify
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Marca una modificación gratis como consumida en el registro de entrega y, si
+// al cliente le quedan incluidas, acuña y devuelve el token del SIGUIENTE
+// enlace. Devuelve '' cuando ya no quedan (a partir de ahí se compra).
+// Nunca lanza: un fallo de contador no puede tumbar una corrección ya aplicada
+// — en el peor caso el cliente pide la siguiente por correo.
+async function consumeFreeChange(env, slug, tokenRecord) {
+  try {
+    const deliveryKey = kvKey(env, 'delivery', slug);
+    const delivery = await env.SERVICE_MENU_KV.get(deliveryKey, { type: 'json' });
+    if (!delivery) return '';
+    // Entregas anteriores a esta versión no tienen contador: se asume que la
+    // que se acaba de usar era la primera.
+    const total = Number.isInteger(delivery.free_total) ? delivery.free_total : freeChanges(env);
+    const used = (Number.isInteger(delivery.free_used) ? delivery.free_used : 0) + 1;
+    delivery.free_total = total;
+    delivery.free_used = used;
+
+    let nextToken = '';
+    if (used < total) {
+      nextToken = generateSecureToken();
+      await env.SERVICE_MENU_KV.put(kvKey(env, 'correction', nextToken), JSON.stringify({
+        correction_token: nextToken,
+        order_id: tokenRecord.order_id,
+        slug,
+        lang: tokenRecord.lang === 'es' ? 'es' : 'en',
+        paid: false,
+        created_at: new Date().toISOString(),
+        used_at: null
+      }), { expirationTtl: 7776000 }); // 90 days
+      delivery.correction_token = nextToken;
+    }
+    await env.SERVICE_MENU_KV.put(deliveryKey, JSON.stringify(delivery), { expirationTtl: 7776000 });
+    return nextToken;
+  } catch (err) {
+    console.error('free change counter failed:', safeError(err));
+    return '';
+  }
+}
+
 function correctionFormUrl(env, token, lang) {
   const baseUrl = (env.PUBLIC_BOOK_BASE_URL || 'https://www.hmulink.com').trim();
   return `${baseUrl}/correct/?t=${encodeURIComponent(token)}&l=${lang === 'es' ? 'es' : 'en'}`;
+}
+
+// Mínimo de campos prellenados para mandar al cliente a SU formulario completo
+// en vez de a la página de texto libre. Con menos, el formulario saldría casi
+// vacío y enviarlo BORRARÍA su información: en ese caso es mejor el camino
+// viejo (/correct/ + IA). Una vertical cuyos forms de Tally todavía no declaran
+// `name:` por pregunta cae sola por aquí, sin romperse.
+const MIN_PREFILL_FIELDS_FOR_FORM_EDIT = 3;
+
+// Tope del fragmento de prefill: un intake completo es mucho más largo que el
+// de un prospecto (1500). 6000 deja la URL dentro de lo que navegadores y
+// proxies manejan sin truncar.
+const MODIFICATION_PREFILL_MAX = 6000;
+
+/**
+ * Enlace de MODIFICACIÓN: el formulario de intake del cliente, prellenado con
+ * lo que él mismo escribió, más los hidden que lo convierten en una edición de
+ * su página existente (client_slug + correction_token) en vez de una página
+ * nueva. Devuelve '' si no hay con qué prellenar — quien llama cae a
+ * `correctionFormUrl`.
+ */
+function modificationFormUrl(env, { token, slug, lang, orderId, customerEmail, prefill }) {
+  const base = ((lang === 'es' ? env.TALLY_FORM_URL_ES : env.TALLY_FORM_URL_EN) || '').trim();
+  if (!base || !slug || !token) return '';
+  const fields = prefill && typeof prefill === 'object' ? Object.keys(prefill).length : 0;
+  if (fields < MIN_PREFILL_FIELDS_FOR_FORM_EDIT) return '';
+
+  // Las bases TALLY_FORM_URL_* ya terminan en `?order_id=`.
+  let url = `${base}${encodeURIComponent(orderId || '')}`;
+  url += `&customer_email=${encodeURIComponent(customerEmail || '')}`;
+  url += `&client_slug=${encodeURIComponent(slug)}`;
+  url += `&correction_token=${encodeURIComponent(token)}`;
+  url += buildPrefillQuery(prefill, MODIFICATION_PREFILL_MAX);
+  return url;
+}
+
+// Enlace de modificación con caída al camino viejo: formulario completo
+// prellenado si se puede, página de texto libre si no.
+/**
+ * Correo de "tu página fue actualizada" tras una modificación hecha con el
+ * formulario completo. Reusa los mismos cuerpos que la corrección por texto
+ * libre, e incluye el enlace de la SIGUIENTE modificación si al cliente le
+ * quedan incluidas (consumeFreeChange ya la acuñó y la dejó en el registro de
+ * entrega). Idempotente por submission_id: Actions puede reintentar.
+ */
+async function notifyModificationApplied({ env, slug, orderId, submissionId }) {
+  const deliveryKey = kvKey(env, 'delivery', slug);
+  const delivery = await env.SERVICE_MENU_KV.get(deliveryKey, { type: 'json' }).catch(() => null);
+  if (delivery?.last_modification_notified === submissionId) {
+    return jsonResponse({ ok: true, idempotent: true, slug });
+  }
+
+  const order = orderId
+    ? await env.SERVICE_MENU_KV.get(kvKey(env, 'order', orderId), { type: 'json' }).catch(() => null)
+    : null;
+  const customerEmail = order?.customer_email || delivery?.customer_email || '';
+  const lang = emailLangFromCurrency(order?.currency) || 'en';
+  const baseUrl = (env.PUBLIC_BOOK_BASE_URL || 'https://www.hmulink.com').trim();
+  const pageUrl = `${baseUrl}/links/${slug}/`;
+
+  // Enlace de la siguiente modificación incluida, si quedan.
+  let nextCorrectionUrl = '';
+  const nextToken = delivery?.correction_token || '';
+  if (nextToken) {
+    const nextRecord = await env.SERVICE_MENU_KV.get(kvKey(env, 'correction', nextToken), { type: 'json' }).catch(() => null);
+    if (nextRecord && !nextRecord.used_at) {
+      nextCorrectionUrl = await bestModificationUrl(env, { token: nextToken, slug, lang, orderId });
+    }
+  }
+
+  if (customerEmail && env.SENDGRID_API_KEY) {
+    try {
+      await sendEmail({
+        env,
+        to: customerEmail,
+        subject: lang === 'es'
+          ? `✅ Tu página ${brandName(env)} fue actualizada`
+          : `✅ Your ${brandName(env)} page was updated`,
+        html: buildCorrectionAppliedEmail({
+          pageUrl, lang, buyUrl: buyCorrectionUrl(env, slug), nextCorrectionUrl, env
+        }),
+        text: buildCorrectionAppliedText({
+          pageUrl, lang, buyUrl: buyCorrectionUrl(env, slug), nextCorrectionUrl, env
+        })
+      });
+    } catch (err) {
+      console.error('modification applied email failed:', safeError(err));
+      return jsonResponse({ ok: false, error: 'Failed to send modification email' }, 500);
+    }
+  }
+
+  if (delivery) {
+    delivery.last_modification_notified = submissionId;
+    delivery.updated_at = new Date().toISOString();
+    await env.SERVICE_MENU_KV.put(deliveryKey, JSON.stringify(delivery), { expirationTtl: 7776000 }).catch(() => {});
+  }
+  return jsonResponse({ ok: true, slug, status: 'modification_notified' });
+}
+
+/**
+ * ¿Este envío del formulario es una modificación de una página ya publicada?
+ * Devuelve {slug, token, record} si el token es válido para ese slug y esa
+ * orden, {} si el envío es un intake normal, o {error} si trae credenciales de
+ * modificación que no cuadran (se rechaza: nunca se degrada a intake nuevo, que
+ * publicaría una página duplicada en silencio).
+ */
+async function resolveModification(env, normalized, order) {
+  const slug = (cleanValue(getAnswer(normalized.answers, 'client_slug')) || '').trim();
+  const token = (cleanValue(getAnswer(normalized.answers, 'correction_token')) || '').trim();
+  if (!slug && !token) return {};
+  if (!slug || !token) return { error: 'incomplete_modification_credentials' };
+  if (!SLUG_RE.test(slug) || token.length > 64) return { error: 'malformed_modification_credentials' };
+
+  const record = await env.SERVICE_MENU_KV.get(kvKey(env, 'correction', token), { type: 'json' }).catch(() => null);
+  if (!record) return { error: 'unknown_correction_token' };
+  if (record.used_at) return { error: 'correction_token_already_used' };
+  if (record.slug !== slug) return { error: 'token_slug_mismatch' };
+  if (record.order_id && order?.order_id && record.order_id !== order.order_id) {
+    return { error: 'token_order_mismatch' };
+  }
+  return { slug, token, record };
+}
+
+async function bestModificationUrl(env, { token, slug, lang, orderId }) {
+  try {
+    const order = orderId
+      ? await env.SERVICE_MENU_KV.get(kvKey(env, 'order', orderId), { type: 'json' })
+      : null;
+    const submissionId = order?.submission_id || '';
+    const submission = submissionId
+      ? await env.SERVICE_MENU_KV.get(kvKey(env, 'submission', submissionId), { type: 'json' })
+      : null;
+    const url = modificationFormUrl(env, {
+      token,
+      slug,
+      lang,
+      orderId,
+      customerEmail: order?.customer_email || '',
+      prefill: submission?.prefill
+    });
+    if (url) return url;
+  } catch (err) {
+    console.error('modification url build failed:', safeError(err));
+  }
+  return correctionFormUrl(env, token, lang);
 }
 
 // La compra de corrección adicional pasa por el worker (crea el Checkout
@@ -812,6 +1097,26 @@ async function handleCorrectionRequest(request, env) {
     console.error('correction token update failed:', safeError(err));
   }
 
+  // Contador de modificaciones GRATIS (estándar de la casa: 2, configurable por
+  // vertical con FREE_CHANGES <- legal.free_changes). Antes cada token valía por
+  // una y se acababa ahí; ahora, si al cliente le quedan incluidas, se acuña el
+  // siguiente enlace aquí y viaja en el correo de "tu página fue actualizada".
+  // Solo consumen cupo las gratis: una modificación comprada no descuenta.
+  if (record.paid !== true) {
+    const nextToken = await consumeFreeChange(env, slug, record);
+    if (nextToken) {
+      try {
+        const requestRecord = await env.SERVICE_MENU_KV.get(kvKey(env, 'correction_request', correctionId), { type: 'json' });
+        if (requestRecord) {
+          requestRecord.next_correction_token = nextToken;
+          await env.SERVICE_MENU_KV.put(kvKey(env, 'correction_request', correctionId), JSON.stringify(requestRecord), { expirationTtl: 7776000 });
+        }
+      } catch (err) {
+        console.error('next correction token save failed:', safeError(err));
+      }
+    }
+  }
+
   // Copia de auditoría para Verónica — nunca bloquea la respuesta al cliente.
   await notifyAdmin(env, `${brandName(env)} corrección solicitada — ${slug}`, [
     `Corrección ${record.paid ? 'ADICIONAL (pagada)' : 'gratuita'} solicitada.`,
@@ -861,9 +1166,10 @@ async function handleBuyCorrection(url, env) {
     'line_items[0][price_data][product_data][name]',
     lang === 'es' ? `${brandName(env)} — Corrección adicional` : `${brandName(env)} — Extra correction`
   );
-  // Metadata PROPIA de esta vertical — stripe-filter.mjs detecta esta misma
-  // key en el webhook (cuenta de Stripe compartida; ver nota ahí).
-  params.set('metadata[pawcontact_correction]', '1');
+  // Metadata por vertical (<PRODUCT_ID>_correction) — el webhook la detecta
+  // con la MISMA función en stripe-filter.mjs; un literal fijo colisionaría
+  // entre verticales en la cuenta compartida de Stripe.
+  params.set(`metadata[${correctionMetadataKey(env)}]`, '1');
   params.set('metadata[slug]', slug);
   params.set('success_url', `${baseUrl}/correct/thanks/?l=${lang}`);
   params.set('cancel_url', `${baseUrl}/links/${slug}/`);
@@ -1004,6 +1310,16 @@ async function handleCorrectionNotify(body, env) {
   const baseUrl = (env.PUBLIC_BOOK_BASE_URL || 'https://www.hmulink.com').trim();
   const pageUrl = `${baseUrl}/links/${record.slug}/`;
   const buyUrl = buyCorrectionUrl(env, record.slug);
+  // Si al cliente le quedaban modificaciones incluidas, /correct ya acuñó el
+  // siguiente enlace: va en este mismo correo para que no tenga que pedirlo.
+  const nextCorrectionUrl = record.next_correction_token
+    ? await bestModificationUrl(env, {
+        token: record.next_correction_token,
+        slug: record.slug,
+        lang,
+        orderId: record.order_id
+      })
+    : '';
 
   if (customerEmail) {
     try {
@@ -1014,8 +1330,8 @@ async function handleCorrectionNotify(body, env) {
           subject: lang === 'es'
             ? `✅ Tu página ${brandName(env)} fue actualizada`
             : `✅ Your ${brandName(env)} page was updated`,
-          html: buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, env }),
-          text: buildCorrectionAppliedText({ pageUrl, lang, buyUrl, env })
+          html: buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, nextCorrectionUrl, env }),
+          text: buildCorrectionAppliedText({ pageUrl, lang, buyUrl, nextCorrectionUrl, env })
         });
       } else {
         await sendEmail({
@@ -1176,7 +1492,7 @@ async function dispatchGitHubAction(env, payload) {
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json',
       // GitHub API rechaza con 403 cualquier request sin User-Agent.
-      'User-Agent': 'service-menu-worker'
+      'User-Agent': workerName(env)
     },
     body: JSON.stringify({
       event_type: eventType,
@@ -1199,7 +1515,7 @@ async function checkRateLimit(env, key, limit, ttl) {
   return true;
 }
 
-async function sendEmail({ env, to, subject, html, text }) {
+async function sendEmail({ env, to, subject, html, text, attachments }) {
   if (!env.SENDGRID_API_KEY) {
     throw new Error('SENDGRID_API_KEY not configured');
   }
@@ -1231,6 +1547,11 @@ async function sendEmail({ env, to, subject, html, text }) {
   };
   if (replyTo) {
     body.reply_to = { email: replyTo };
+  }
+  // Adjuntos (hoy: el QR de la entrega, inline vía content_id). Solo se agrega
+  // la clave si hay algo: SendGrid rechaza `attachments: []`.
+  if (Array.isArray(attachments) && attachments.length) {
+    body.attachments = attachments;
   }
 
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -1279,6 +1600,14 @@ function normalizeTallyPayload(payload) {
     Array.isArray(payload?.fields) ? payload.fields :
     [];
 
+  // `prefill` guarda SOLO {field name de Tally -> texto}, que es justo lo que
+  // se puede volver a meter en el formulario por URL (Ola 1c). `answers` mezcla
+  // labels, ids y claves normalizadas — sirve para leer el intake, pero no para
+  // reconstruirlo. Los nombres son estables porque tally_form.yaml los declara
+  // (`name:` por pregunta); si una vertical aún no los declara, este mapa sale
+  // casi vacío y el flujo cae solo al camino viejo (/correct/ de texto libre).
+  const prefill = {};
+
   for (const field of fields) {
     const value = extractTallyFieldValue(field);
     const keys = [field?.key, field?.name, field?.label, field?.title, field?.id].filter(Boolean);
@@ -1286,12 +1615,17 @@ function normalizeTallyPayload(payload) {
       answers[String(key)] = value;
       answers[normalizeKey(String(key))] = value;
     }
+    const name = typeof field?.name === 'string' ? field.name.trim() : '';
+    if (name && typeof value === 'string' && value !== '') {
+      prefill[name] = value;
+    }
   }
 
   return {
     submission_id: String(submissionId || ''),
     form_id: String(payload?.data?.formId || payload?.formId || ''),
-    answers
+    answers,
+    prefill
   };
 }
 
@@ -1351,16 +1685,6 @@ function getAnswer(answers, key) {
   const normalizedKey = normalizeKey(key);
   if (normalizedKey in answers) return answers[normalizedKey];
   return undefined;
-}
-
-function normalizeKey(key) {
-  return String(key || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
 }
 
 function answerAny(answers, keys) {
@@ -1521,11 +1845,16 @@ function buildPublicPayload(normalized, orderId, env) {
     brandStyle = fallbackBrandStyle(validStyles);
   }
 
-  // Regla del idioma (Fase 2.6 del motor): respuesta explícita del cliente >
-  // idioma del formulario que llenó (form_id vs TALLY_FORM_URL_ES/EN, ver
-  // tallyFormLang) > 'en'. Antes el fallback comparaba contra 'MeyDpk' (el
-  // form ES de HMU, hardcodeado) y todo intake ES de PawContact caía a inglés.
-  const langRaw = answerAny(a, FIELD_ALIASES.default_language);
+  // FIELD_ALIASES.default_language solo trae alias genéricos (sin marca); los
+  // dos alias específicos de marca ("...your <BRAND> show first") se derivan de
+  // BRAND_NAME en tiempo de ejecución (languageQuestionAliases, Fase 2.3/2.9 —
+  // antes 'hmu_link' vivía hardcodeado en el JSON compartido con cada vertical).
+  // Regla del idioma (ronda 3 de deuda del worker): respuesta explícita del
+  // cliente > idioma del formulario que llenó (form_id vs TALLY_FORM_URL_ES/EN,
+  // ver tallyFormLang) > 'en'. Antes el fallback comparaba contra 'MeyDpk' (el
+  // form ES de HMU, hardcodeado), así que toda vertical exportada caía a inglés.
+  const langAliases = [...FIELD_ALIASES.default_language, ...languageQuestionAliases(env)];
+  const langRaw = answerAny(a, langAliases);
   const defaultLanguage = resolveDefaultLanguage(langRaw, env, normalized.form_id);
 
   const businessName = answerAny(a, FIELD_ALIASES.business_name);
@@ -1652,10 +1981,16 @@ function jsonResponse(data, status = 200) {
 // en inglés con cuerpo en español (o viceversa) confunde y dispara filtros de spam
 // por incongruencia de idioma — el asunto ya se localiza, así que el cuerpo también.
 // El correo enlaza AMBOS formularios; el del idioma del comprador va primero.
-function buildPostPaymentEmail({ formUrlEN, formUrlES, lang, env }) {
+// Qué versiones del correo post-pago se mandan: una sola cuando la moneda
+// identifica el idioma (MXN/USD), las dos cuando no (emailLangFromCurrency
+// devuelve null). Inglés primero en el caso bilingüe: si la moneda no es ni MXN
+// ni USD, el comprador es de fuera y el inglés es la apuesta más segura.
+function postPaymentLangs(lang) {
+  return lang === 'es' || lang === 'en' ? [lang] : ['en', 'es'];
+}
+
+function postPaymentCopy(lang, { btnES, btnEN, env }) {
   const es = lang !== 'en';
-  const btnES = `<a href="${formUrlES}" style="display: inline-block; background: #f478b0; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">Abrir Formulario (Español)</a>`;
-  const btnEN = `<a href="${formUrlEN}" style="display: inline-block; background: #00a0b5; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">Open Form (English)</a>`;
   const t = es
     ? {
         heading: '¡Tu página de servicios está casi lista!',
@@ -1677,15 +2012,15 @@ function buildPostPaymentEmail({ formUrlEN, formUrlES, lang, env }) {
         secondBtn: btnES,
         closing: "Once you complete the form, we'll generate your page and you'll get a link to share with your customers."
       };
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; margin: 0; padding: 20px;">
-  <div style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+  return t;
+}
+
+function buildPostPaymentEmail({ formUrlEN, formUrlES, lang, env }) {
+  const btnES = `<a href="${formUrlES}" style="display: inline-block; background: #f478b0; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">Abrir Formulario (Español)</a>`;
+  const btnEN = `<a href="${formUrlEN}" style="display: inline-block; background: #00a0b5; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">Open Form (English)</a>`;
+  const sections = postPaymentLangs(lang).map((l) => {
+    const t = postPaymentCopy(l, { btnES, btnEN, env });
+    return `
     <h2 style="margin-top: 0; color: #1a1a1a;">${t.heading}</h2>
     <p>${t.greeting}</p>
     <p>${t.intro}</p>
@@ -1697,7 +2032,18 @@ function buildPostPaymentEmail({ formUrlEN, formUrlES, lang, env }) {
       ${t.secondBtn}
     </div>
 
-    <p style="color: #666; font-size: 14px;">${t.closing}</p>
+    <p style="color: #666; font-size: 14px;">${t.closing}</p>`;
+  });
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; margin: 0; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+${sections.join('\n    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">\n')}
 
     <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
     <p style="color: #999; font-size: 12px; margin: 0;">${emailFooterHtml(env)}</p>
@@ -1709,41 +2055,61 @@ function buildPostPaymentEmail({ formUrlEN, formUrlES, lang, env }) {
 
 // Versión text/plain del correo post-pago (multipart mejora deliverability).
 function buildPostPaymentText({ formUrlEN, formUrlES, lang, env }) {
-  const es = lang !== 'en';
   const lineES = `Completa tu formulario (Español): ${formUrlES}`;
   const lineEN = `Open your form (English): ${formUrlEN}`;
-  if (es) {
-    return [
-      '¡Tu página de servicios está casi lista!',
-      '',
-      `Gracias por tu compra en ${brandName(env)}. Solo falta un paso: completa tu formulario de información para que generemos tu página.`,
-      '',
-      lineES,
-      lineEN,
-      '',
-      'Una vez que completes el formulario, generaremos tu página y recibirás un link para compartir con tus clientes.',
-      '',
-      emailFooterText(env)
-    ].join('\n');
-  }
-  return [
-    'Your service page is almost ready!',
-    '',
-    `Thanks for your purchase at ${brandName(env)}. Just one step left: fill out your info form so we can generate your page.`,
-    '',
-    lineEN,
-    lineES,
-    '',
-    "Once you complete the form, we'll generate your page and you'll get a link to share with your customers.",
-    '',
-    emailFooterText(env)
-  ].join('\n');
+  const block = (l) => (l === 'es'
+    ? [
+        '¡Tu página de servicios está casi lista!',
+        '',
+        `Gracias por tu compra en ${brandName(env)}. Solo falta un paso: completa tu formulario de información para que generemos tu página.`,
+        '',
+        lineES,
+        lineEN,
+        '',
+        'Una vez que completes el formulario, generaremos tu página y recibirás un link para compartir con tus clientes.'
+      ]
+    : [
+        'Your service page is almost ready!',
+        '',
+        `Thanks for your purchase at ${brandName(env)}. Just one step left: fill out your info form so we can generate your page.`,
+        '',
+        lineEN,
+        lineES,
+        '',
+        "Once you complete the form, we'll generate your page and you'll get a link to share with your customers."
+      ]);
+  const body = postPaymentLangs(lang).map((l) => block(l).join('\n')).join('\n\n---\n\n');
+  return [body, '', emailFooterText(env)].join('\n');
 }
+
+// content_id del QR que se adjunta inline en el correo de entrega: el HTML lo
+// referencia como `cid:<esto>` y SendGrid resuelve el adjunto.
+const DELIVERY_QR_CID = 'delivery-qr';
 
 // La corrección gratuita se pide con el botón (flujo automatizado /correct/)
 // o respondiendo al correo (reply_to va al buzón real) — ambas vías valen.
-function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, env }) {
+function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, hasQr, env }) {
   const es = lang !== 'en';
+  // Cuántas modificaciones gratis incluye la compra (FREE_CHANGES <-
+  // legal.free_changes): el correo dice el MISMO número que los Términos.
+  const free = freeChanges(env);
+  const qrCopy = es
+    ? {
+        title: '📲 Tu código QR',
+        body: 'Imprímelo o pégalo donde tus clientes puedan escanearlo. También va adjunto como imagen PNG en este correo.'
+      }
+    : {
+        title: '📲 Your QR code',
+        body: 'Print it or put it anywhere your customers can scan it. It is also attached to this email as a PNG image.'
+      };
+  const qrBlock = hasQr
+    ? `
+    <div style="margin: 30px 0; text-align: center;">
+      <p style="margin: 0 0 12px 0; color: #333; font-weight: 500;">${qrCopy.title}</p>
+      <img src="cid:${DELIVERY_QR_CID}" alt="QR" width="180" height="180" style="display: inline-block; border: 1px solid #eee; border-radius: 8px;">
+      <p style="margin: 12px 0 0 0; color: #888; font-size: 12px;">${qrCopy.body}</p>
+    </div>`
+    : '';
   const t = es
     ? {
         heading: '¡Tu página de servicios está lista! 🎉',
@@ -1757,9 +2123,11 @@ function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, env }) {
           'Descarga el código QR desde tu página para compartir fácilmente',
           'Comparte el link en tu bio de Instagram, WhatsApp, tarjetas de visita, etc.'
         ],
-        correctionTitle: '✏️ Incluido: Una corrección gratuita',
-        correctionBody: 'Si necesitas hacer cambios en tu información (horarios, servicios, precios, etc.), tienes derecho a una corrección gratuita. Pídela con este botón y la aplicamos automáticamente:',
-        correctionBtn: 'Solicitar mi corrección',
+        correctionTitle: free === 1
+          ? '✏️ Incluido: 1 modificación gratis'
+          : `✏️ Incluido: ${free} modificaciones gratis`,
+        correctionBody: `Si necesitas cambiar tu información (horarios, servicios, precios, etc.), tu compra incluye ${free === 1 ? 'una modificación' : `${free} modificaciones`} sin costo. Ábrela con este botón: verás tu información actual y editas solo lo que quieras cambiar.`,
+        correctionBtn: 'Usar mi modificación incluida',
         correctionAlt: 'También puedes simplemente responder a este correo con los cambios que quieras. Para cambiar fotos o logo, responde a este correo adjuntando los archivos.'
       }
     : {
@@ -1774,9 +2142,11 @@ function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, env }) {
           'Download the QR code from your page to share it easily',
           'Share the link in your Instagram bio, WhatsApp, business cards, etc.'
         ],
-        correctionTitle: '✏️ Included: One free correction',
-        correctionBody: 'If you need to change your info (hours, services, prices, etc.), you get one free correction. Request it with this button and we\'ll apply it automatically:',
-        correctionBtn: 'Request my correction',
+        correctionTitle: free === 1
+          ? '✏️ Included: 1 free modification'
+          : `✏️ Included: ${free} free modifications`,
+        correctionBody: `If you need to change your info (hours, services, prices, etc.), your purchase includes ${free === 1 ? 'one free modification' : `${free} free modifications`}. Open it with this button: you will see your current information and edit only what you want to change.`,
+        correctionBtn: 'Use my included modification',
         correctionAlt: 'You can also simply reply to this email with the changes you want. To change photos or your logo, reply to this email with the files attached.'
       };
   return `
@@ -1798,7 +2168,7 @@ function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, env }) {
     </div>
 
     <p style="color: #999; font-size: 13px;">${t.note}</p>
-
+${qrBlock}
     <h3 style="color: #1a1a1a; margin-top: 30px;">${t.stepsTitle}</h3>
     <ul style="color: #666;">
       <li>${t.steps[0]}</li>
@@ -1822,8 +2192,9 @@ function buildDeliveryEmail({ pageUrl, slug, lang, correctionUrl, env }) {
 }
 
 // Versión text/plain del correo de entrega.
-function buildDeliveryText({ pageUrl, lang, correctionUrl, env }) {
+function buildDeliveryText({ pageUrl, lang, correctionUrl, hasQr, env }) {
   const es = lang !== 'en';
+  const free = freeChanges(env);
   if (es) {
     return [
       '¡Tu página de servicios está lista!',
@@ -1834,10 +2205,12 @@ function buildDeliveryText({ pageUrl, lang, correctionUrl, env }) {
       '',
       'Próximos pasos:',
       '- Abre tu página y verifica que todo se vea correcto',
-      '- Descarga el código QR desde tu página para compartir fácilmente',
+      hasQr
+      ? '- Tu código QR va adjunto en este correo (PNG), listo para imprimir'
+      : '- Descarga el código QR desde tu página para compartir fácilmente',
       '- Comparte el link en tu bio de Instagram, WhatsApp, tarjetas de visita, etc.',
       '',
-      'Incluido: una corrección gratuita. Si necesitas cambios (horarios, servicios, precios, etc.), pídela aquí y la aplicamos automáticamente:',
+      `Incluido: ${free === 1 ? 'una modificación' : `${free} modificaciones`} sin costo. Ábrela aquí y edita solo lo que quieras cambiar:`,
       correctionUrl,
       'También puedes responder a este correo con los cambios (fotos o logo: adjúntalos en tu respuesta).',
       '',
@@ -1853,10 +2226,12 @@ function buildDeliveryText({ pageUrl, lang, correctionUrl, env }) {
     '',
     'Next steps:',
     '- Open your page and check that everything looks right',
-    '- Download the QR code from your page to share it easily',
+    hasQr
+      ? '- Your QR code is attached to this email (PNG), ready to print'
+      : '- Download the QR code from your page to share it easily',
     '- Share the link in your Instagram bio, WhatsApp, business cards, etc.',
     '',
-    'Included: one free correction. If you need changes (hours, services, prices, etc.), request it here and we\'ll apply it automatically:',
+    `Included: ${free === 1 ? 'one free modification' : `${free} free modifications`}. Open it here and edit only what you want to change:`,
     correctionUrl,
     'You can also reply to this email with the changes (photos or logo: attach the files in your reply).',
     '',
@@ -1888,7 +2263,7 @@ function correctionEmailShell(innerHtml, env) {
 
 // Corrección aplicada: confirma y ofrece la corrección adicional de pago
 // (precio de la sección 3 de los Términos).
-function buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, env }) {
+function buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, nextCorrectionUrl, env }) {
   const es = lang !== 'en';
   const priceLabel = es ? CORRECTION_PRICE.mxn.label : CORRECTION_PRICE.usd.label;
   const t = es
@@ -1898,7 +2273,10 @@ function buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, env }) {
         buyTitle: '¿Necesitas otro cambio?',
         buyBody: `Puedes comprar una corrección adicional por ${priceLabel}:`,
         buyBtn: 'Comprar corrección adicional',
-        alt: 'Si algo no quedó como esperabas, responde a este correo y lo revisamos sin costo.'
+        alt: 'Si algo no quedó como esperabas, responde a este correo y lo revisamos sin costo.',
+        nextTitle: '✏️ Todavía te queda una modificación incluida',
+        nextBody: 'Cuando la necesites, ábrela con este enlace: verás tu información actual y editas solo lo que quieras cambiar.',
+        nextBtn: 'Usar mi modificación incluida'
       }
     : {
         heading: '✅ Your page was updated',
@@ -1906,9 +2284,22 @@ function buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, env }) {
         buyTitle: 'Need another change?',
         buyBody: `You can buy an extra correction for ${priceLabel}:`,
         buyBtn: 'Buy an extra correction',
-        alt: 'If something didn\'t come out as expected, reply to this email and we\'ll review it at no cost.'
+        alt: 'If something didn\'t come out as expected, reply to this email and we\'ll review it at no cost.',
+        nextTitle: '✏️ You still have one included modification',
+        nextBody: 'Whenever you need it, open this link: you will see your current information and edit only what you want to change.',
+        nextBtn: 'Use my included modification'
       };
-  const buyBlock = buyUrl
+  // Si al cliente le quedan modificaciones incluidas se le ofrece ESA, no la de
+  // pago: cobrarle teniendo una gratis disponible sería, como mínimo, mala fe.
+  const nextBlock = nextCorrectionUrl
+    ? `
+    <div style="margin: 30px 0; padding: 20px; background: #fff9e6; border-left: 4px solid #ffa934; border-radius: 4px;">
+      <p style="margin: 0 0 10px 0; color: #333; font-weight: 500;">${t.nextTitle}</p>
+      <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">${t.nextBody}</p>
+      <a href="${nextCorrectionUrl}" style="display: inline-block; background: #ffa934; color: #4a2c00; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">${t.nextBtn}</a>
+    </div>`
+    : '';
+  const buyBlock = (!nextCorrectionUrl && buyUrl)
     ? `
     <div style="margin: 30px 0; padding: 20px; background: #f0f8ff; border-left: 4px solid #00a0b5; border-radius: 4px;">
       <p style="margin: 0 0 10px 0; color: #333; font-weight: 500;">${t.buyTitle}</p>
@@ -1920,12 +2311,12 @@ function buildCorrectionAppliedEmail({ pageUrl, lang, buyUrl, env }) {
     <h2 style="margin-top: 0; color: #1a1a1a;">${t.heading}</h2>
     <p>${t.intro}</p>
     <p><a href="${pageUrl}" style="color: #00a0b5; font-size: 18px; font-weight: 500; word-break: break-all;">${pageUrl}</a></p>
-    ${buyBlock}
+    ${nextBlock}${buyBlock}
     <p style="color: #666; font-size: 14px;">${t.alt}</p>
   `, env);
 }
 
-function buildCorrectionAppliedText({ pageUrl, lang, buyUrl, env }) {
+function buildCorrectionAppliedText({ pageUrl, lang, buyUrl, nextCorrectionUrl, env }) {
   const es = lang !== 'en';
   const priceLabel = es ? CORRECTION_PRICE.mxn.label : CORRECTION_PRICE.usd.label;
   const lines = es
@@ -1934,7 +2325,9 @@ function buildCorrectionAppliedText({ pageUrl, lang, buyUrl, env }) {
         '',
         `Revisa tu página (puede tardar unos minutos en reflejarse): ${pageUrl}`,
         '',
-        ...(buyUrl ? [`¿Necesitas otro cambio? Compra una corrección adicional por ${priceLabel}: ${buyUrl}`, ''] : []),
+        ...(nextCorrectionUrl
+          ? [`Todavía te queda una modificación incluida. Ábrela aquí y edita solo lo que quieras cambiar: ${nextCorrectionUrl}`, '']
+          : buyUrl ? [`¿Necesitas otro cambio? Compra una corrección adicional por ${priceLabel}: ${buyUrl}`, ''] : []),
         'Si algo no quedó como esperabas, responde a este correo y lo revisamos sin costo.',
         '',
         emailFooterText(env)
@@ -1944,7 +2337,9 @@ function buildCorrectionAppliedText({ pageUrl, lang, buyUrl, env }) {
         '',
         `Check your page (it may take a few minutes to refresh): ${pageUrl}`,
         '',
-        ...(buyUrl ? [`Need another change? Buy an extra correction for ${priceLabel}: ${buyUrl}`, ''] : []),
+        ...(nextCorrectionUrl
+          ? [`You still have one included modification. Open it here and edit only what you want to change: ${nextCorrectionUrl}`, '']
+          : buyUrl ? [`Need another change? Buy an extra correction for ${priceLabel}: ${buyUrl}`, ''] : []),
         'If something didn\'t come out as expected, reply to this email and we\'ll review it at no cost.',
         '',
         emailFooterText(env)

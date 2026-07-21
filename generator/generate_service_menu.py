@@ -54,7 +54,9 @@ except ImportError:  # pragma: no cover - clear guidance if dependency missing
     segno = None
 
 from blocks import block_enabled
-from vertical_config import BLOCKS, BRAND_NAME, DOMAIN, STRINGS, STYLES_CATALOG
+from vertical_config import (
+    BLOCKS, BRAND_NAME, DOMAIN, LEGAL, STRINGS, STYLES_CATALOG,
+)
 
 # Repo layout (this file lives in <repo>/generator/) — standalone export,
 # produced by link-factory/scripts/export_vertical.py. To change this
@@ -1047,6 +1049,28 @@ def make_qr_svg(public_url: str) -> str:
     return buff.getvalue().decode("utf-8")
 
 
+QR_PNG_ASSET_NAME = "qr.png"
+
+
+def make_qr_png(public_url: str) -> bytes:
+    """Return the same QR as a PNG, for the delivery email (Ola 1c).
+
+    PNG and not SVG on purpose: email clients do not render SVG attachments, so
+    the QR that goes inline in the delivery email has to be a raster image. The
+    page keeps using `qr.svg` (crisper at any size). Portado de ModaLink, que
+    era el único producto que ya mandaba el QR por correo.
+    """
+    if segno is None:
+        raise ValidationError(
+            "Falta la dependencia 'segno' para generar el QR. "
+            "Instala con: pip install -r requirements.txt"
+        )
+    qr = segno.make(public_url, error="m")
+    buff = io.BytesIO()
+    qr.save(buff, kind="png", scale=8, border=2, dark="#111111")
+    return buff.getvalue()
+
+
 def build_share(public_url: str, s: dict, qr_src: str = QR_ASSET_NAME) -> str:
     """"Share" section: QR image + visible link, centered, base theme.
 
@@ -1082,11 +1106,21 @@ def build_share(public_url: str, s: dict, qr_src: str = QR_ASSET_NAME) -> str:
     )
 
 
+# Per-vertical legal disclaimers (vertical.yaml -> `legal.disclaimers`) are
+# rendered with INLINE styles on purpose: the template's stylesheet is inlined
+# into every page, so adding a `.footer__disclaimer` rule there would change the
+# bytes of all 12 golden demos even for verticals that declare no disclaimers.
+# Inline styles keep a vertical with `disclaimers: []` byte-identical to before.
+DISCLAIMER_WRAP_STYLE = "margin-top:12px;font-size:.76rem;line-height:1.55;opacity:.85"
+DISCLAIMER_ITEM_STYLE = "margin:0 0 4px"
+
+
 def build_footer(
     payload: dict,
     text: str = f"{BRAND_NAME} - Demo",
     privacy_url: str = "",
     privacy_label: str = "",
+    disclaimers: tuple = (),
 ) -> str:
     name = esc(payload.get("business_name"))
     # Attribution credit links back to this vertical's own site (derived from
@@ -1104,10 +1138,18 @@ def build_footer(
             f'<a class="footer__link" href="{esc(privacy_url)}" '
             f'target="_blank" rel="noopener">{esc(privacy_label)}</a>'
         )
+    notes = ""
+    texts = [str(item).strip() for item in disclaimers if str(item).strip()]
+    if texts:
+        items = "".join(
+            f'<p class="footer__disclaimer" style="{DISCLAIMER_ITEM_STYLE}">{esc(item)}</p>'
+            for item in texts
+        )
+        notes = f'<div class="footer__disclaimers" style="{DISCLAIMER_WRAP_STYLE}">{items}</div>'
     return (
         '<footer class="footer">'
         f'<span class="serif">{name}</span>'
-        f'{credit}{legal}'
+        f'{credit}{legal}{notes}'
         "</footer>"
     )
 
@@ -1166,6 +1208,10 @@ def render_view(
             footer_text,
             f"{DOMAIN}/privacy/" if lang == "en" else f"{DOMAIN}/es/privacidad/",
             s["footer_privacy"],
+            # `legal.disclaimers` in vertical.yaml, in this page's language. The
+            # generator inserts them so they are not removable by hand-editing a
+            # published page (house rule). Empty for verticals that declare none.
+            tuple(item.get(lang, "") for item in LEGAL.get("disclaimers") or ()),
         ),
         "{{DOCK_BLOCK}}": build_dock(view, s),
         "{{SCROLL_HINT}}": s["scroll_hint"],
@@ -1282,8 +1328,13 @@ def build_client(json_path: Path) -> Path:
 
     (root_dir / "index.html").write_text(default_html, encoding="utf-8")
     (alt_dir / "index.html").write_text(alt_html, encoding="utf-8")
-    # One QR per client, encoding the default-language URL.
+    # One QR per client, encoding the default-language URL. The SVG is the one
+    # the page shows; the PNG existe solo para que el workflow lo mande en
+    # base64 al worker y el correo de entrega lo adjunte inline (los clientes de
+    # correo no renderizan SVG). Se emite SOLO para clientes: un archivo nuevo
+    # en las demos rompería el golden, que compara el árbol byte a byte.
     (root_dir / QR_ASSET_NAME).write_text(make_qr_svg(root_url), encoding="utf-8")
+    (root_dir / QR_PNG_ASSET_NAME).write_bytes(make_qr_png(root_url))
     return root_dir / "index.html"
 
 

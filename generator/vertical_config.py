@@ -61,9 +61,39 @@ def build_strings(brand_name: str, overrides: dict) -> dict:
     return strings
 
 
+# House legal policy (Vero, 2026-07-20): one refund window for every business,
+# `hello@<domain>` as the standard mailbox, CFDI on request. Mirrors
+# engine/generator/vertical_config.py — keep both in sync when it changes.
+LEGAL_DEFAULTS = {
+    "refund_days": 7,
+    "free_changes": 2,
+    "support_email": "",
+    "responsable": "",
+    "domicilio_fiscal": "",
+    "jurisdiction": "Estados Unidos Mexicanos",
+    "updated": "",
+    "cfdi": True,
+    "disclaimers": [],
+}
+
+
+def apex_domain(domain: str) -> str:
+    host = str(domain).split("//", 1)[-1].strip("/").split("/", 1)[0]
+    return host[4:] if host.lower().startswith("www.") else host
+
+
+def build_legal(raw: dict) -> dict:
+    legal = copy.deepcopy(LEGAL_DEFAULTS)
+    legal.update({k: v for k, v in (raw.get("legal") or {}).items() if v is not None})
+    if not str(legal["support_email"]).strip():
+        legal["support_email"] = f"hello@{apex_domain(raw['domain'])}"
+    return legal
+
+
 VERTICAL = load_vertical()
 BRAND_NAME = VERTICAL["brand_name"]
 DOMAIN = VERTICAL["domain"].rstrip("/")
 STYLES_CATALOG = tuple(VERTICAL["styles"]["catalog"])
 STRINGS = build_strings(BRAND_NAME, VERTICAL.get("strings_overrides"))
 BLOCKS = merge_blocks(VERTICAL.get("blocks"))
+LEGAL = build_legal(VERTICAL)
