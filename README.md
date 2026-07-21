@@ -3,7 +3,10 @@
 > Exportado de la Link Factory (`scripts/export_vertical.py`, vertical
 > `pawcontact`). No edites `generator/`, `worker/worker.js`,
 > `worker/product-config.mjs` ni `worker/stripe-filter.mjs` a mano: son el
-> motor compartido — corregí en el repo de la fábrica y volvé a exportar.
+> motor compartido — corregí en el repo de la fábrica y bajá el fix con
+> `--engine-only` (**nunca** `--force`: borra este repo entero, con
+> `data/clients` y `wrangler.toml`). La tienda se baja aparte con
+> `--store-only`. Reglas completas del repo: `CLAUDE.md`.
 > `vertical.yaml`, `data/`, `worker/wrangler.toml` y los workflows sí son
 > propios de este repo (podés versionarlos con sus propios cambios, p. ej.
 > el dominio real o los ids de infra de Etapa B).
