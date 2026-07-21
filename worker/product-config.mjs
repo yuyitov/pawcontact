@@ -279,3 +279,26 @@ export function modificationFormPrefillEnabled(env) {
   const raw = String((env && env.MODIFICATION_FORM_PREFILL) ?? '').trim().toLowerCase();
   return raw === '1' || raw === 'true' || raw === 'yes';
 }
+
+// Los prefill.json de Cory usan sus propios nombres (hours, maps_url,
+// reviews_url); los formularios creados con `name:` estable usan los del spec
+// (opening_hours_text, google_maps_url, google_reviews_url). Este helper
+// duplica las claves que difieren para que la MISMA URL prellene los dos
+// estilos de formulario — los nombres que un formulario no declara como hidden
+// field, Tally simplemente los ignora. Puro y testeable; nunca lanza.
+const CORY_PREFILL_ALIASES = {
+  hours: 'opening_hours_text',
+  maps_url: 'google_maps_url',
+  reviews_url: 'google_reviews_url',
+};
+
+export function expandProspectPrefill(prefill) {
+  if (!prefill || typeof prefill !== 'object') return {};
+  const out = { ...prefill };
+  for (const [from, to] of Object.entries(CORY_PREFILL_ALIASES)) {
+    if (typeof prefill[from] === 'string' && prefill[from] !== '' && !(to in out)) {
+      out[to] = prefill[from];
+    }
+  }
+  return out;
+}

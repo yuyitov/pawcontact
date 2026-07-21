@@ -59,12 +59,12 @@
  */
 
 import { classifyStripeEvent } from './stripe-filter.mjs';
-import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges, modificationFormPrefillEnabled } from './product-config.mjs';
+import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges, modificationFormPrefillEnabled, expandProspectPrefill } from './product-config.mjs';
 // Mapa campo-público -> alias de título del intake de Tally, única fuente de
 // verdad compartida con create_tally_forms.py --check-mapping (ver el archivo).
 // Es config por vertical: export_vertical.py copia este JSON a cada repo, así
 // una vertical con otras preguntas edita SUS alias sin tocar este worker.
-import FIELD_ALIASES from './tally-field-aliases.json';
+import FIELD_ALIASES from './tally-field-aliases.json' with { type: 'json' };
 
 // Precio de la corrección adicional — DEBE coincidir con la sección 3 de los
 // Términos publicados (public/terms/ y public/es/terminos/): $6 USD / $59 MXN.
@@ -87,6 +87,12 @@ const CORRECTION_TEXT_MAX = 3000;
 // (corsOrigin) sin propagar `env` por los ~74 call-sites de jsonResponse. No hay
 // fuga entre requests: todas ven el mismo valor, escribirlo es idempotente.
 let _workerEnv = null;
+
+// Named export (ademas del default que usa Cloudflare) para probar la
+// normalizacion del payload de Tally con node --test — en particular que un
+// hidden field nunca pise la respuesta visible del mismo nombre. La runtime de
+// Workers solo invoca el default export; esto es inerte ahi.
+export { normalizeTallyPayload };
 
 export default {
   async fetch(request, env, ctx) {
@@ -294,8 +300,12 @@ async function handleStripeWebhook(request, env) {
   // arriba (order_id + email) y el post-pago sigue idéntico al de hoy.
   const prefill = await fetchProspectPrefill(env, prospectSlug(session));
   if (prefill) {
-    formUrlEN += buildPrefillQuery(prefill.en);
-    formUrlES += buildPrefillQuery(prefill.es);
+    // expandProspectPrefill agrega alias con los nombres del spec (hours ->
+    // opening_hours_text, etc.): los formularios creados con `name:` estable
+    // usan esos nombres en sus hidden fields, y los viejos (HMU) los de Cory.
+    // Mandar ambos sirve a los dos; el tope sube porque van claves duplicadas.
+    formUrlEN += buildPrefillQuery(expandProspectPrefill(prefill.en), 2500);
+    formUrlES += buildPrefillQuery(expandProspectPrefill(prefill.es), 2500);
   }
 
   // Reserve the idempotency marker BEFORE sending so a concurrent duplicate
@@ -1620,13 +1630,23 @@ function normalizeTallyPayload(payload) {
 
   for (const field of fields) {
     const value = extractTallyFieldValue(field);
+    // Desde el cableado de prefill (2026-07-21) cada campo de texto tiene un
+    // HIDDEN FIELD con su MISMO nombre (asi Tally muestra el valor de la URL
+    // como default answer). En el submit llegan LOS DOS con ese nombre: el
+    // hidden trae lo que decia la URL y el visible lo que el cliente dejo al
+    // enviar. El visible SIEMPRE manda — un hidden nunca pisa una respuesta ya
+    // escrita (si el cliente edito el campo, honrar el hidden publicaria el
+    // valor viejo) y jamas entra al mapa de prefill.
+    const isHidden = field?.type === 'HIDDEN_FIELDS';
     const keys = [field?.key, field?.name, field?.label, field?.title, field?.id].filter(Boolean);
     for (const key of keys) {
-      answers[String(key)] = value;
-      answers[normalizeKey(String(key))] = value;
+      for (const k of [String(key), normalizeKey(String(key))]) {
+        if (isHidden && k in answers && cleanValue(answers[k]) !== '') continue;
+        answers[k] = value;
+      }
     }
     const name = typeof field?.name === 'string' ? field.name.trim() : '';
-    if (name && typeof value === 'string' && value !== '') {
+    if (!isHidden && name && typeof value === 'string' && value !== '') {
       prefill[name] = value;
     }
   }

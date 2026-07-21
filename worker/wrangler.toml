@@ -51,14 +51,15 @@ WORKER_NAME          = "pawcontact-worker"
 # los Términos publicados (legal.free_changes de vertical.yaml) — si los dos no
 # coinciden, el producto promete por escrito algo que el worker no entrega.
 FREE_CHANGES          = "2"
-# Modificacion por FORMULARIO PRELLENADO (Ola 1c). APAGADO: Tally no prellena
-# una pregunta visible por su `name` — el valor llega en la URL pero el campo se
-# renderiza vacio (verificado 2026-07-21). Sus 2 formularios ya tienen los 29
-# `name` estables y los hidden fields client_slug/correction_token, pero FALTA
-# el cableado de "default answer" pregunta por pregunta en el editor de Tally.
-# Mientras este vacio, la modificacion usa /correct/ (texto libre), que funciona.
-# Ponerlo en "1" SOLO despues de cablear y probar los dos formularios.
-MODIFICATION_FORM_PREFILL = ""
+# Modificacion por FORMULARIO PRELLENADO (Ola 1c). PRENDIDO desde el
+# 2026-07-21: los 2 formularios estan cableados por API — 21 campos de texto con
+# hidden field propio + "default answer" apuntando a el (verificado renderizando
+# con una URL sonda en ES y EN), mas los hidden client_slug/correction_token que
+# validan la modificacion. Dropdowns, checkbox y archivos no se prellenan (mismo
+# criterio que HMU). Si algun dia se recrean los formularios, el cableado se
+# rehace ANTES de volver a prender esto — apagado, cae a /correct/ y nada se
+# rompe.
+MODIFICATION_FORM_PREFILL = "1"
 # Marca usada en asuntos/cuerpos/footers de los correos.
 BRAND_NAME            = "PawContact"
 BRAND_TAGLINE          = "Service menus for pet businesses"
