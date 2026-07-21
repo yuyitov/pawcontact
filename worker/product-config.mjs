@@ -257,3 +257,25 @@ export function buildPrefillQuery(prefill, maxLen = 1500) {
   }
   return out;
 }
+
+// ¿Esta vertical puede mandar al cliente a SU formulario de Tally prellenado
+// para pedir una modificación (Ola 1c), o cae al `/correct/` de texto libre?
+//
+// Es un interruptor explícito y apagado por default a propósito. Tally **no**
+// prellena una pregunta visible por su `name`: el valor llega en la URL pero el
+// campo se renderiza vacío (verificado el 2026-07-21 con un formulario de
+// prueba). Lo que sí funciona —y es como opera el prefill de Cory en HMU— es
+// que el dato viaje a un HIDDEN FIELD y que cada pregunta visible lo tome con
+// "default answer", cableado a mano en el editor de Tally.
+//
+// Sin ese cableado, el cliente recibiría un formulario VACÍO y al enviarlo
+// borraría todo lo que no reescribiera. El fail-safe original (mínimo de campos
+// de prefill) no protege: Tally siempre manda un `name` por campo —derivado del
+// título— así que el mapa nunca está vacío y la condición siempre se cumple.
+//
+// Prender solo cuando los DOS formularios de la vertical estén cableados:
+// MODIFICATION_FORM_PREFILL = "1" en su wrangler.toml.
+export function modificationFormPrefillEnabled(env) {
+  const raw = String((env && env.MODIFICATION_FORM_PREFILL) ?? '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}

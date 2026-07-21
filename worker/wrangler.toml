@@ -51,6 +51,14 @@ WORKER_NAME          = "pawcontact-worker"
 # los Términos publicados (legal.free_changes de vertical.yaml) — si los dos no
 # coinciden, el producto promete por escrito algo que el worker no entrega.
 FREE_CHANGES          = "2"
+# Modificacion por FORMULARIO PRELLENADO (Ola 1c). APAGADO: Tally no prellena
+# una pregunta visible por su `name` — el valor llega en la URL pero el campo se
+# renderiza vacio (verificado 2026-07-21). Sus 2 formularios ya tienen los 29
+# `name` estables y los hidden fields client_slug/correction_token, pero FALTA
+# el cableado de "default answer" pregunta por pregunta en el editor de Tally.
+# Mientras este vacio, la modificacion usa /correct/ (texto libre), que funciona.
+# Ponerlo en "1" SOLO despues de cablear y probar los dos formularios.
+MODIFICATION_FORM_PREFILL = ""
 # Marca usada en asuntos/cuerpos/footers de los correos.
 BRAND_NAME            = "PawContact"
 BRAND_TAGLINE          = "Service menus for pet businesses"
@@ -70,8 +78,10 @@ GITHUB_ACTIONS_EVENT = "new-pawcontact-service-menu"
 TALLY_FORM_URL_EN    = "https://tally.so/r/zxo55M?order_id="
 TALLY_FORM_URL_ES    = "https://tally.so/r/0QyRRB?order_id="
 FROM_EMAIL           = "PawContact <hello@pawcontact.com>"
-# hello@ no suele ser un buzón real; las respuestas (p.ej. corrección gratuita)
-# deben llegar a un correo monitoreado.
+# Buzón monitoreado al que llegan las respuestas de los clientes (p.ej. la
+# corrección gratuita). hello@pawcontact.com SÍ recibe desde el 2026-07-20
+# (Email Routing en Cloudflare → el gmail de Vero), pero el reply-to sigue
+# apuntando directo para que nada dependa del reenvío.
 REPLY_TO_EMAIL       = "veronica.perezarroyo@gmail.com"
 PUBLIC_BOOK_BASE_URL = "https://www.pawcontact.com"
 # URL pública de este worker — la usan los links de "comprar corrección
@@ -79,8 +89,11 @@ PUBLIC_BOOK_BASE_URL = "https://www.pawcontact.com"
 WORKER_PUBLIC_URL    = "https://pawcontact-worker.veronica-perezarroyo.workers.dev"
 # OPCIONAL — Prefill de prospecto (Cory → worker, Fase 2.4). Base pública donde
 # el prospector publica el prefill.json de cada prospecto: el worker lee
-# `${base}/${slug}/prefill.json` y prellena los campos visibles del formulario de
-# Tally con los datos que ya recolectó, cuando la compra llegó por un link
-# rastreado (client_reference_id=<slug>). Configurada 2026-07-18 (P7): el
+# `${base}/${slug}/prefill.json` y agrega esos datos a la URL del formulario de
+# Tally del correo post-pago, cuando la compra llegó por un link rastreado
+# (client_reference_id=<slug>). OJO: los valores aterrizan en los HIDDEN FIELDS;
+# para que el cliente los VEA cargados, cada pregunta visible debe tomarlos con
+# "default answer" en el editor de Tally (Tally no prellena un campo visible por
+# su `name` — verificado 2026-07-21). Configurada 2026-07-18 (P7): el
 # prospector de Cory ya alimenta esta vertical (pawcontact-prospector).
 PROSPECT_PREFILL_BASE_URL = "https://pawcontact-prospector.pages.dev/p"

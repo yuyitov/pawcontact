@@ -59,7 +59,7 @@
  */
 
 import { classifyStripeEvent } from './stripe-filter.mjs';
-import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges } from './product-config.mjs';
+import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges, modificationFormPrefillEnabled } from './product-config.mjs';
 // Mapa campo-público -> alias de título del intake de Tally, única fuente de
 // verdad compartida con create_tally_forms.py --check-mapping (ver el archivo).
 // Es config por vertical: export_vertical.py copia este JSON a cada repo, así
@@ -837,8 +837,13 @@ function correctionFormUrl(env, token, lang) {
 // Mínimo de campos prellenados para mandar al cliente a SU formulario completo
 // en vez de a la página de texto libre. Con menos, el formulario saldría casi
 // vacío y enviarlo BORRARÍA su información: en ese caso es mejor el camino
-// viejo (/correct/ + IA). Una vertical cuyos forms de Tally todavía no declaran
-// `name:` por pregunta cae sola por aquí, sin romperse.
+// viejo (/correct/ + IA).
+//
+// OJO: esta cota NO alcanza como red de seguridad, aunque se diseñó para eso.
+// Tally manda un `name` por CADA campo —derivado del título si el spec no lo
+// declara— así que el mapa de prefill nunca está vacío y la condición siempre
+// se cumple, incluso en una vertical sin cablear. La red real es el interruptor
+// MODIFICATION_FORM_PREFILL de arriba (hallazgo del 2026-07-21).
 const MIN_PREFILL_FIELDS_FOR_FORM_EDIT = 3;
 
 // Tope del fragmento de prefill: un intake completo es mucho más largo que el
@@ -854,6 +859,11 @@ const MODIFICATION_PREFILL_MAX = 6000;
  * `correctionFormUrl`.
  */
 function modificationFormUrl(env, { token, slug, lang, orderId, customerEmail, prefill }) {
+  // Interruptor explícito por vertical: sin el cableado de hidden fields +
+  // "default answer" en Tally, el formulario llega VACÍO y enviarlo borraría lo
+  // que el cliente no reescriba. Apagado = `/correct/` de texto libre, que
+  // funciona. Ver modificationFormPrefillEnabled en product-config.mjs.
+  if (!modificationFormPrefillEnabled(env)) return '';
   const base = ((lang === 'es' ? env.TALLY_FORM_URL_ES : env.TALLY_FORM_URL_EN) || '').trim();
   if (!base || !slug || !token) return '';
   const fields = prefill && typeof prefill === 'object' ? Object.keys(prefill).length : 0;
