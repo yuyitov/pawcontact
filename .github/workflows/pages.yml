@@ -26,11 +26,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Auditoria de ataque 2026-07-23 (#13): acciones pineadas a SHA (repo
+      # PUBLICO). Un tag @vN es mutable; el SHA no. Misma version que ya corria.
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
 
@@ -113,7 +115,7 @@ jobs:
           echo "OK: sin secrets obvios."
 
       - name: Upload public/ as Pages artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: public/
 
@@ -126,4 +128,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
