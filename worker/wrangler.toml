@@ -84,6 +84,16 @@ FROM_EMAIL           = "PawContact <hello@pawcontact.com>"
 # (Email Routing en Cloudflare → el gmail de Vero), pero el reply-to sigue
 # apuntando directo para que nada dependa del reenvío.
 REPLY_TO_EMAIL       = "veronica.perezarroyo@gmail.com"
+# Destino de las ALERTAS de embudo muerto (Bloque A.3): filter_not_configured,
+# other_product, failed_dispatch, incomplete_intake y "generación falló". Vacío
+# = cae a REPLY_TO_EMAIL (mismo buzón) — funciona desde el primer deploy.
+ALERT_EMAIL          = "veronica.perezarroyo@gmail.com"
+# Cuenta Stripe COMPARTIDA: cada venta de un producto hermano también llega a
+# este worker como `other_product`. Lista aquí (coma-separado) los plink de esos
+# productos que ya conoces para NO recibir una alerta por cada una. Solo se
+# alerta de un `other_product` cuyo plink no esté ni en STRIPE_PAYMENT_LINK_ID ni
+# aquí — el síntoma de un link propio desfasado. Empieza vacío.
+KNOWN_OTHER_PAYMENT_LINKS = ""
 PUBLIC_BOOK_BASE_URL = "https://www.pawcontact.com"
 # URL pública de este worker — la usan los links de "comprar corrección
 # adicional" (/buy-correction) que van en correos y en la página /correct/.
