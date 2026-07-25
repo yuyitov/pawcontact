@@ -86,7 +86,12 @@ p { max-width: 66ch; }
   transition: border-color .3s ease, box-shadow .3s ease;
 }
 .top.scrolled { border-bottom-color: var(--line); box-shadow: 0 8px 28px -20px rgba(61,43,31,.4); }
-.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* flex-wrap: la barra estaba calibrada al ancho exacto de PawContact (logo de
+   una palabra) y se desbordaba en horizontal con una marca de nombre largo
+   como The Catalog Link. Con wrap, una marca que cabe se sigue pintando igual
+   (no se dispara) y una que no cabe baja las acciones a un segundo renglon en
+   vez de romper el ancho de la pagina en movil. */
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; }
 .logo { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--accent); font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; white-space: nowrap; }
 .logo img { width: 28px; height: 28px; border-radius: 7px; transition: transform .4s var(--ease); }
 .logo:hover img { transform: rotate(-10deg) scale(1.08); }
@@ -94,7 +99,7 @@ p { max-width: 66ch; }
 .top nav { display: none; gap: 24px; }
 .top nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.92rem; }
 .top nav a:hover { color: var(--brand-deep); }
-.top-actions { display: flex; align-items: center; gap: 10px; }
+.top-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .lang { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; padding: 3px; background: var(--card); font-size: 0.76rem; font-weight: 600; }
 .lang a, .lang span { padding: 4px 10px; border-radius: 999px; text-decoration: none; color: var(--muted); }
 .lang span { background: var(--accent); color: #fff; }

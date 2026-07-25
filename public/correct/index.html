@@ -312,10 +312,20 @@
       });
   });
 
+  // Guard de esquema (hallazgo #18 de la auditoria 2026-07-23): estos href
+  // salen de un JSON del worker. Hoy ese JSON lo controla el servidor, asi que
+  // no es explotable -- pero un `javascript:` o un `data:` colado ahi se
+  // ejecutaria con un clic del cliente, y cerrarlo cuesta esta funcion.
+  // Solo http(s); cualquier otra cosa cae a '#'.
+  function safeHref(url) {
+    var s = String(url || '').trim();
+    return /^https?:\/\//i.test(s) ? s : '#';
+  }
+
   function setBuyLink(buyUrl) {
     var link = document.getElementById('buy-link');
     if (buyUrl) {
-      link.href = buyUrl;
+      link.href = safeHref(buyUrl);
     } else {
       link.href = 'mailto:' + SUPPORT_EMAIL + '?subject=' + encodeURIComponent(
         lang === 'es'
@@ -341,7 +351,7 @@
     .then(function (data) {
       if (data.state === 'valid') {
         var link = document.getElementById('page-link');
-        link.href = data.page_url || '#';
+        link.href = safeHref(data.page_url);
         link.textContent = data.page_url || '';
         show('form');
         ta.focus();
