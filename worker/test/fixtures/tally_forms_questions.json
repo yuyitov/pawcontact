@@ -1,0 +1,478 @@
+{
+  "_comment": "Inventario de los DOS formularios Tally VIVOS de PawContact (EN y ES). Solo ids, tipos, titulos y el texto de las opciones: cero respuestas, cero datos de clientes. Lo genera worker/test/tomar_snapshot.mjs desde la API de Tally. NO sale de tally_form.yaml del repo: ese archivo es la ESPECIFICACION, y el formulario vivo puede haberse quedado atras (paso el 2026-07-26). Medir contra el yaml y creerle es el error que trajo el plan de cero regresiones.",
+  "snapshot_date": "2026-07-26",
+  "forms": [
+    {
+      "lang": "en",
+      "form_id": "zxo55M",
+      "form_name": "PawContact — Your business questionnaire",
+      "hidden_fields": [
+        "order_id",
+        "customer_email",
+        "client_slug",
+        "correction_token",
+        "business_name",
+        "short_description",
+        "whatsapp",
+        "phone",
+        "public_email",
+        "website",
+        "booking_url",
+        "instagram",
+        "facebook",
+        "tiktok",
+        "services_text",
+        "featured_text",
+        "policies_text",
+        "faq_text",
+        "opening_hours_text",
+        "address",
+        "google_maps_url",
+        "google_reviews_url",
+        "delivery_pickup_links_text",
+        "portfolio_link",
+        "pet_notes_text"
+      ],
+      "questions": [
+        {
+          "id": "OYQRya",
+          "type": "INPUT_TEXT",
+          "title": "business_name",
+          "title_editor": "Business name"
+        },
+        {
+          "id": "VYpryj",
+          "type": "DROPDOWN",
+          "title": "pick_your_style",
+          "title_editor": "Pick your style",
+          "options": [
+            "sunny-paws — playful and bright (groomers)",
+            "aqua-clean — fresh and clean (vet clinics)",
+            "sage-calm — natural and calm (boarding/daycare)",
+            "warm-sand — warm and artisanal (boutiques)"
+          ]
+        },
+        {
+          "id": "PYRoy1",
+          "type": "DROPDOWN",
+          "title": "business_type",
+          "title_editor": "What type of business is it?",
+          "options": [
+            "Pet grooming",
+            "Pet clinic / veterinary care",
+            "Boarding / daycare",
+            "Dog training",
+            "Pet products / boutique"
+          ]
+        },
+        {
+          "id": "EDqpYl",
+          "type": "TEXTAREA",
+          "title": "short_description",
+          "title_editor": "Describe your business in 1-2 sentences"
+        },
+        {
+          "id": "rLDXWo",
+          "type": "INPUT_PHONE_NUMBER",
+          "title": "whatsapp",
+          "title_editor": "Public WhatsApp number for clients"
+        },
+        {
+          "id": "4vaZdr",
+          "type": "INPUT_PHONE_NUMBER",
+          "title": "phone",
+          "title_editor": "Public phone number for calls"
+        },
+        {
+          "id": "jWeK2Q",
+          "type": "INPUT_EMAIL",
+          "title": "public_email",
+          "title_editor": "Public email"
+        },
+        {
+          "id": "2vj25e",
+          "type": "INPUT_LINK",
+          "title": "website",
+          "title_editor": "Website"
+        },
+        {
+          "id": "xyVGBd",
+          "type": "INPUT_LINK",
+          "title": "booking_url",
+          "title_editor": "External booking link"
+        },
+        {
+          "id": "ZY9xyV",
+          "type": "INPUT_LINK",
+          "title": "instagram",
+          "title_editor": "Instagram"
+        },
+        {
+          "id": "NYqzy0",
+          "type": "INPUT_LINK",
+          "title": "facebook",
+          "title_editor": "Facebook"
+        },
+        {
+          "id": "qW5yeO",
+          "type": "INPUT_LINK",
+          "title": "tiktok",
+          "title_editor": "TikTok"
+        },
+        {
+          "id": "QYoGyY",
+          "type": "DROPDOWN",
+          "title": "primary_cta",
+          "title_editor": "Which button should be featured?",
+          "options": [
+            "WhatsApp",
+            "Phone call",
+            "Booking link",
+            "Website",
+            "Instagram"
+          ]
+        },
+        {
+          "id": "9vNe5E",
+          "type": "TEXTAREA",
+          "title": "services_text",
+          "title_editor": "List your services with prices"
+        },
+        {
+          "id": "e25bPx",
+          "type": "DROPDOWN",
+          "title": "price_display",
+          "title_editor": "How should prices appear on your public page?",
+          "options": [
+            "Show all prices",
+            "Don't show prices",
+            "Mixed — some shown, some hidden"
+          ]
+        },
+        {
+          "id": "WYJ4de",
+          "type": "TEXTAREA",
+          "title": "featured_text",
+          "title_editor": "Featured package, promo, or signature offer"
+        },
+        {
+          "id": "aEOWoZ",
+          "type": "TEXTAREA",
+          "title": "policies_text",
+          "title_editor": "Policies your clients should see"
+        },
+        {
+          "id": "6vDq5A",
+          "type": "TEXTAREA",
+          "title": "faq_text",
+          "title_editor": "Frequently asked questions"
+        },
+        {
+          "id": "7vXQ5a",
+          "type": "TEXTAREA",
+          "title": "opening_hours_text",
+          "title_editor": "What are your business hours?"
+        },
+        {
+          "id": "brZaG6",
+          "type": "INPUT_TEXT",
+          "title": "address",
+          "title_editor": "Location 1 public address"
+        },
+        {
+          "id": "ADrk5y",
+          "type": "INPUT_LINK",
+          "title": "google_maps_url",
+          "title_editor": "Location 1 Google Maps link"
+        },
+        {
+          "id": "BDEv5e",
+          "type": "INPUT_LINK",
+          "title": "google_reviews_url",
+          "title_editor": "Google Reviews link"
+        },
+        {
+          "id": "kWbLxr",
+          "type": "TEXTAREA",
+          "title": "delivery_pickup_links_text",
+          "title_editor": "Delivery / pickup links"
+        },
+        {
+          "id": "vLXRbg",
+          "type": "INPUT_LINK",
+          "title": "portfolio_link",
+          "title_editor": "Portfolio link"
+        },
+        {
+          "id": "KDpXyg",
+          "type": "FILE_UPLOAD",
+          "title": "logo_url",
+          "title_editor": "Upload your logo"
+        },
+        {
+          "id": "LYD8yy",
+          "type": "FILE_UPLOAD",
+          "title": "image_url",
+          "title_editor": "Upload a main photo"
+        },
+        {
+          "id": "pWeg91",
+          "type": "FILE_UPLOAD",
+          "title": "gallery_image_urls",
+          "title_editor": "More photos"
+        },
+        {
+          "id": "1vWj5g",
+          "type": "TEXTAREA",
+          "title": "pet_notes_text",
+          "title_editor": "Anything pet parents should know before their visit?"
+        },
+        {
+          "id": "MY10yl",
+          "type": "CHECKBOXES",
+          "title": "photo_rights_confirmed",
+          "title_editor": "I confirm the photos I upload are mine or I have the right to use them",
+          "options": [
+            "Yes"
+          ]
+        }
+      ]
+    },
+    {
+      "lang": "es",
+      "form_id": "0QyRRB",
+      "form_name": "PawContact — Cuestionario de tu negocio",
+      "hidden_fields": [
+        "order_id",
+        "customer_email",
+        "client_slug",
+        "correction_token",
+        "business_name",
+        "short_description",
+        "whatsapp",
+        "phone",
+        "public_email",
+        "website",
+        "booking_url",
+        "instagram",
+        "facebook",
+        "tiktok",
+        "services_text",
+        "featured_text",
+        "policies_text",
+        "faq_text",
+        "opening_hours_text",
+        "address",
+        "google_maps_url",
+        "google_reviews_url",
+        "delivery_pickup_links_text",
+        "portfolio_link",
+        "pet_notes_text"
+      ],
+      "questions": [
+        {
+          "id": "e25bpx",
+          "type": "INPUT_TEXT",
+          "title": "business_name",
+          "title_editor": "Nombre del negocio"
+        },
+        {
+          "id": "WYJ4ge",
+          "type": "DROPDOWN",
+          "title": "pick_your_style",
+          "title_editor": "Elige tu estilo",
+          "options": [
+            "sunny-paws — alegre y jugueton (estilistas/grooming)",
+            "aqua-clean — limpio y fresco (veterinarias)",
+            "sage-calm — natural y relajante (hoteles/guarderias)",
+            "warm-sand — calido y cercano (boutiques)"
+          ]
+        },
+        {
+          "id": "aEOWyZ",
+          "type": "DROPDOWN",
+          "title": "business_type",
+          "title_editor": "¿Qué tipo de negocio es?",
+          "options": [
+            "Estética canina para mascotas",
+            "Veterinaria",
+            "Hospedaje / guardería",
+            "Entrenamiento canino",
+            "Tienda / boutique de productos"
+          ]
+        },
+        {
+          "id": "6vDq9A",
+          "type": "TEXTAREA",
+          "title": "short_description",
+          "title_editor": "Describe tu negocio en 1-2 frases"
+        },
+        {
+          "id": "7vXQea",
+          "type": "INPUT_PHONE_NUMBER",
+          "title": "whatsapp",
+          "title_editor": "WhatsApp público para tus clientes"
+        },
+        {
+          "id": "brZaD6",
+          "type": "INPUT_PHONE_NUMBER",
+          "title": "phone",
+          "title_editor": "Teléfono público para llamadas"
+        },
+        {
+          "id": "ADrk0y",
+          "type": "INPUT_EMAIL",
+          "title": "public_email",
+          "title_editor": "Correo público"
+        },
+        {
+          "id": "BDEvge",
+          "type": "INPUT_LINK",
+          "title": "website",
+          "title_editor": "Sitio web"
+        },
+        {
+          "id": "kWbLpr",
+          "type": "INPUT_LINK",
+          "title": "booking_url",
+          "title_editor": "Enlace externo de reservas"
+        },
+        {
+          "id": "vLXRpg",
+          "type": "INPUT_LINK",
+          "title": "instagram",
+          "title_editor": "Instagram"
+        },
+        {
+          "id": "KDpXgg",
+          "type": "INPUT_LINK",
+          "title": "facebook",
+          "title_editor": "Facebook"
+        },
+        {
+          "id": "LYD8gy",
+          "type": "INPUT_LINK",
+          "title": "tiktok",
+          "title_editor": "TikTok"
+        },
+        {
+          "id": "pWegM1",
+          "type": "DROPDOWN",
+          "title": "primary_cta",
+          "title_editor": "¿Qué botón quieres destacar?",
+          "options": [
+            "WhatsApp",
+            "Llamada telefónica",
+            "Reservas / agenda",
+            "Sitio web",
+            "Instagram"
+          ]
+        },
+        {
+          "id": "1vWjxg",
+          "type": "TEXTAREA",
+          "title": "services_text",
+          "title_editor": "Lista tus servicios con precios"
+        },
+        {
+          "id": "MY10gl",
+          "type": "DROPDOWN",
+          "title": "price_display",
+          "title_editor": "¿Cómo deben aparecer los precios en tu página pública?",
+          "options": [
+            "Mostrar todos los precios",
+            "No mostrar precios",
+            "Mixto — algunos precios sí, otros no"
+          ]
+        },
+        {
+          "id": "JD1ygr",
+          "type": "TEXTAREA",
+          "title": "featured_text",
+          "title_editor": "Paquete destacado, promoción u oferta especial"
+        },
+        {
+          "id": "gZbBpP",
+          "type": "TEXTAREA",
+          "title": "policies_text",
+          "title_editor": "Políticas que tus clientes deben ver"
+        },
+        {
+          "id": "yvXOG8",
+          "type": "TEXTAREA",
+          "title": "faq_text",
+          "title_editor": "Preguntas frecuentes"
+        },
+        {
+          "id": "XY5jgP",
+          "type": "TEXTAREA",
+          "title": "opening_hours_text",
+          "title_editor": "¿Cuáles son tus horarios de atención?"
+        },
+        {
+          "id": "88N9Wl",
+          "type": "INPUT_TEXT",
+          "title": "address",
+          "title_editor": "Ubicación 1 dirección pública"
+        },
+        {
+          "id": "0vV4l9",
+          "type": "INPUT_LINK",
+          "title": "google_maps_url",
+          "title_editor": "Ubicación 1 enlace de Google Maps"
+        },
+        {
+          "id": "zJEVOk",
+          "type": "INPUT_LINK",
+          "title": "google_reviews_url",
+          "title_editor": "Enlace de Google Reviews"
+        },
+        {
+          "id": "5vXNQN",
+          "type": "TEXTAREA",
+          "title": "delivery_pickup_links_text",
+          "title_editor": "Links de delivery / pickup"
+        },
+        {
+          "id": "djb7pr",
+          "type": "INPUT_LINK",
+          "title": "portfolio_link",
+          "title_editor": "Enlace de portafolio"
+        },
+        {
+          "id": "YYj2gN",
+          "type": "FILE_UPLOAD",
+          "title": "logo_url",
+          "title_editor": "Sube tu logo"
+        },
+        {
+          "id": "DDqLYl",
+          "type": "FILE_UPLOAD",
+          "title": "image_url",
+          "title_editor": "Sube una foto principal"
+        },
+        {
+          "id": "lWap5o",
+          "type": "FILE_UPLOAD",
+          "title": "gallery_image_urls",
+          "title_editor": "Más fotos"
+        },
+        {
+          "id": "RYWOlK",
+          "type": "TEXTAREA",
+          "title": "pet_notes_text",
+          "title_editor": "¿Algo que debamos saber antes de traer a tu mascota?"
+        },
+        {
+          "id": "od9JQb",
+          "type": "CHECKBOXES",
+          "title": "photo_rights_confirmed",
+          "title_editor": "Confirmo que las fotos que subo son mías o tengo derecho de usarlas",
+          "options": [
+            "Sí"
+          ]
+        }
+      ]
+    }
+  ]
+}
