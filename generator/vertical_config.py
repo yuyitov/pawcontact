@@ -94,6 +94,20 @@ VERTICAL = load_vertical()
 BRAND_NAME = VERTICAL["brand_name"]
 DOMAIN = VERTICAL["domain"].rstrip("/")
 STYLES_CATALOG = tuple(VERTICAL["styles"]["catalog"])
+# Plantilla base del engine con la que renderiza esta vertical
+# (`service-menu` | `catalog`). generate_catalog.py la importa; el generador de
+# service-menu no la usa, pero se expone siempre para que las dos plantillas
+# vean el mismo modulo de config.
+TEMPLATE = VERTICAL.get("template") or "service-menu"
+# Que generador renderiza cada plantilla. Espejo de
+# engine/generator/vertical_config.py::GENERATOR_FOR_TEMPLATE, que es la fuente
+# de verdad en la fabrica; aqui viaja porque build_client_from_intake.py --el
+# camino de un cliente que YA PAGO-- lo importa para no llamar al generador
+# equivocado. Sin esta linea el repo exportado ni siquiera importa ese modulo.
+GENERATOR_FOR_TEMPLATE = {
+    "service-menu": "generate_service_menu",
+    "catalog": "generate_catalog",
+}
 STRINGS = build_strings(BRAND_NAME, VERTICAL.get("strings_overrides"))
 BLOCKS = merge_blocks(VERTICAL.get("blocks"))
 LEGAL = build_legal(VERTICAL)

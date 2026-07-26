@@ -159,6 +159,87 @@ export function resolveDefaultLanguage(langRaw, env, formId) {
   return tallyFormLang(env, formId) || 'en';
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANTILLA DE PÁGINA (F6 bloque 2)
+//
+// El motor renderiza dos plantillas base: `service-menu` (las 5 verticales que
+// hoy venden) y `catalog` (The Catalog Link). En Python la fuente de verdad es
+// `vertical.yaml::template`, leída por vertical_config.py; el worker no lee YAML,
+// así que el export vuelca ese mismo valor a la var TEMPLATE del wrangler.toml.
+//
+// El default es `service-menu` A PROPÓSITO: los 5 workers ya desplegados NO
+// declaran TEMPLATE y deben seguir comportándose byte a byte igual. Un valor
+// desconocido también cae al default — el worker nunca debe negarse a procesar
+// un intake pagado por una var mal escrita; lo que se ramifica por plantilla es
+// qué campos se extraen, y esa decisión falla hacia lo que ya funciona.
+export const DEFAULT_TEMPLATE = 'service-menu';
+export const KNOWN_TEMPLATES = ['service-menu', 'catalog'];
+
+export function pageTemplate(env) {
+  const raw = String((env && env.TEMPLATE) || '').trim().toLowerCase();
+  return KNOWN_TEMPLATES.includes(raw) ? raw : DEFAULT_TEMPLATE;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTÓN DE VENTA DEL CATÁLOGO (F6 bloque 2)
+//
+// El catálogo no tiene los 8 canales de contacto de service-menu: tiene UN botón
+// por producto, y el cliente elige su canal en el claim. Los tres tipos son los
+// que reconoce generate_catalog.py::SALE_KINDS — si divergen, el generador
+// rechaza el payload de un cliente que YA PAGÓ, así que el nombre exacto importa
+// más que la comodidad de escribirlo bonito.
+export const SALE_BUTTON_KINDS = ['whatsapp', 'sms', 'tel'];
+
+// Respuesta de la pregunta "¿por dónde te escriben?" -> kind del generador.
+// Acepta el texto de la opción en los dos idiomas (normalizado con normalizeKey)
+// y también el valor crudo por si el formulario cambia de wording.
+const SALE_KIND_ALIASES = {
+  whatsapp: 'whatsapp',
+  wa: 'whatsapp',
+  wpp: 'whatsapp',
+  whats: 'whatsapp',
+  sms: 'sms',
+  mensaje: 'sms',
+  mensaje_de_texto: 'sms',
+  text: 'sms',
+  text_message: 'sms',
+  texto: 'sms',
+  tel: 'tel',
+  telefono: 'tel',
+  phone: 'tel',
+  call: 'tel',
+  llamada: 'tel',
+  llamar: 'tel',
+  phone_call: 'tel',
+  llamada_telefonica: 'tel',
+};
+
+// Devuelve el kind normalizado, o '' si la respuesta no se reconoce. Fail-open
+// hacia WhatsApp NO: un botón que abre el canal equivocado es peor que uno que
+// el gate de intake incompleto detiene con un motivo legible.
+export function normalizeSaleKind(value) {
+  const key = normalizeKey(value);
+  if (!key) return '';
+  if (SALE_KIND_ALIASES[key]) return SALE_KIND_ALIASES[key];
+  // La opción del formulario suele venir con explicación ("WhatsApp — te
+  // escriben al chat"); basta con que empiece por un alias conocido.
+  for (const [alias, kind] of Object.entries(SALE_KIND_ALIASES)) {
+    if (key.startsWith(`${alias}_`)) return kind;
+  }
+  return '';
+}
+
+// El valor del botón: un teléfono (se conservan los dígitos, más el '+' inicial
+// que el cliente suele escribir) o, como escotilla, una URL pública. Igual que
+// generate_catalog.py::sale_href, que acepta las dos formas.
+export function normalizeSaleValue(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const digits = raw.replace(/\D/g, '');
+  return digits || raw;
+}
+
 export function emailFooterHtml(env) {
   return `${brandName(env)} — ${brandTagline(env)}`;
 }

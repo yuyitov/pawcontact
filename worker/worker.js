@@ -59,7 +59,7 @@
  */
 
 import { classifyStripeEvent } from './stripe-filter.mjs';
-import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges, modificationFormPrefillEnabled, expandProspectPrefill } from './product-config.mjs';
+import { kvKey, brandName, brandTagline, brandDomain, emailFooterHtml, emailFooterText, corsOrigin, validBrandStyles, fallbackBrandStyle, prospectPrefillBase, prospectSlug, buildPrefillQuery, workerName, normalizeKey, languageQuestionAliases, resolveDefaultLanguage, correctionMetadataKey, emailLangFromCurrency, sanitizeBase64Image, freeChanges, modificationFormPrefillEnabled, expandProspectPrefill, pageTemplate, normalizeSaleKind, normalizeSaleValue, SALE_BUTTON_KINDS } from './product-config.mjs';
 // Mapa campo-público -> alias de título del intake de Tally, única fuente de
 // verdad compartida con create_tally_forms.py --check-mapping (ver el archivo).
 // Es config por vertical: export_vertical.py copia este JSON a cada repo, así
@@ -92,7 +92,11 @@ let _workerEnv = null;
 // normalizacion del payload de Tally con node --test — en particular que un
 // hidden field nunca pise la respuesta visible del mismo nombre. La runtime de
 // Workers solo invoca el default export; esto es inerte ahi.
-export { normalizeTallyPayload };
+// buildPublicPayload/missingFromIntake se exportan por la misma razón desde que
+// el worker sirve DOS plantillas (F6 bloque 2): la rama que elige es lo que
+// decide si un cliente que pagó recibe su catálogo o una página de menú de
+// servicios, y eso tiene que poder probarse sin desplegar ni tocar KV.
+export { normalizeTallyPayload, buildPublicPayload, missingFromIntake };
 
 export default {
   async fetch(request, env, ctx) {
@@ -130,22 +134,18 @@ export default {
         return await handleTallyWebhook(request, env);
       }
 
-      if (request.method === 'POST' && pathname === '/notify') {
-        const allowed = await checkRateLimit(env, kvKey(env, 'rl', 'notify', ip, minuteSlot), 20, 120);
-        if (!allowed) return jsonResponse({ ok: false, error: 'Too many requests' }, 429);
-        return await handleNotify(request, env);
+      if (request.method === 'POST' && pathname === '/alert-generation-failed') {
+        return await handleGenerationFailedAlert(request, env);
       }
 
-      // Alerta de "pagó pero la generación falló": la llama el step if:failure()
-      // del workflow de generación. Autenticado con el mismo NOTIFY_SECRET de /notify.
       if (request.method === 'POST' && pathname === '/email-events') {
         return await handleEmailEvents(request, env);
       }
 
-      if (request.method === 'POST' && pathname === '/alert-generation-failed') {
-        const allowed = await checkRateLimit(env, kvKey(env, 'rl', 'genfail', ip, minuteSlot), 20, 120);
+      if (request.method === 'POST' && pathname === '/notify') {
+        const allowed = await checkRateLimit(env, kvKey(env, 'rl', 'notify', ip, minuteSlot), 20, 120);
         if (!allowed) return jsonResponse({ ok: false, error: 'Too many requests' }, 429);
-        return await handleGenerationFailedAlert(request, env);
+        return await handleNotify(request, env);
       }
 
       // Correcciones: consumidos por la página estática /correct/ del sitio.
@@ -182,15 +182,29 @@ export default {
 // STRIPE WEBHOOK HANDLER
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Lee un secreto del entorno recortando espacios y saltos de linea.
+ *
+ * Copiar un signing secret del panel de Stripe, de Tally o de GitHub arrastra
+ * con facilidad un `\n` final, y `wrangler secret put` lo guarda tal cual. Un
+ * secreto con basura invisible no falla de forma ruidosa: rompe el HMAC y deja
+ * el webhook rechazando TODO en silencio (el checkout cobra y el intake nunca
+ * llega). NOTIFY_SECRET ya lo recortaba; esto lo vuelve la regla para todos.
+ */
+function secret(env, name) {
+  return (env[name] || '').trim();
+}
+
 async function handleStripeWebhook(request, env) {
-  if (!env.STRIPE_WEBHOOK_SECRET) {
+  const webhookSecret = secret(env, 'STRIPE_WEBHOOK_SECRET');
+  if (!webhookSecret) {
     return jsonResponse({ ok: false, error: 'Stripe webhook not configured' }, 500);
   }
 
   const rawBody = await request.text();
   const signatureHeader = request.headers.get('stripe-signature') || '';
 
-  const valid = await validateStripeSignature(rawBody, signatureHeader, env.STRIPE_WEBHOOK_SECRET);
+  const valid = await validateStripeSignature(rawBody, signatureHeader, webhookSecret);
   if (!valid) {
     return jsonResponse({ ok: false, error: 'Invalid Stripe signature' }, 400);
   }
@@ -226,51 +240,47 @@ async function handleStripeWebhook(request, env) {
         if (type === 'checkout.session.completed') {
           console.log('stripe payment_link observed (filter not configured):', verdict.observedPaymentLink || '(none)');
         }
-        // FALLO SILENCIOSO #1 (el más probable): allowlist vacío → se IGNORAN
-        // todos los pagos. Alerta GLOBAL (una por hora), no por pi: durante el
-        // apagón la cuenta compartida fanea eventos de todos los productos.
+        // FALLO SILENCIOSO #1 (el mas probable y mas caro): el allowlist esta
+        // vacio -> se IGNORAN todos los pagos. Alerta GLOBAL (una por hora), no
+        // por pago: durante el apagon la cuenta compartida fanea eventos de
+        // todos los productos y un dedup por-pago seria una tormenta.
         await alertOnce(env, 'filter_not_configured', 3600,
-          `🔴 ${brandName(env)} está IGNORANDO todos los pagos (filtro sin configurar)`, [
-            `STRIPE_PAYMENT_LINK_ID está vacío/sin configurar en el worker de ${brandName(env)}.`,
+          `${marca(env)} esta IGNORANDO todos los pagos (filtro sin configurar)`, [
+            'STRIPE_PAYMENT_LINK_ID esta vacio/sin configurar en este worker.',
             'El worker responde 200 {ignored} a TODOS los pagos entrantes: el',
             'cliente paga y NUNCA recibe el formulario de intake.',
             '',
-            `payment_link observado en este evento: ${verdict.observedPaymentLink || '(ninguno)'}`,
-            `tipo de evento: ${type}`,
-            '',
-            'Acción: configurar STRIPE_PAYMENT_LINK_ID (vars del worker) con el/los',
-            'plink de la vertical y redesplegar.'
+            'Revisa STRIPE_PAYMENT_LINK_ID en wrangler.toml y redespliega.',
           ]);
         return jsonResponse({ ok: true, ignored: true, reason: 'filter_not_configured' });
       case 'unattributable_event_type':
         return jsonResponse({ ok: true, ignored: true, reason: 'unattributable_event_type' });
-      case 'other_product': {
+      case 'other_product':
         // Diagnostic: surface filter mismatches (plink ids are not secrets).
         console.log('ignored other_product — observed plink:', verdict.observedPaymentLink || '(none)', '| expected:', verdict.expectedPaymentLinks.join(','));
-        // FALLO SILENCIOSO #2: un link de esta vertical desfasado (reprecio) cae
-        // aquí. PERO la cuenta Stripe es COMPARTIDA: cada venta de un producto
-        // hermano también llega como other_product. Solo se alerta de links
-        // DESCONOCIDOS (ni de esta vertical ni en KNOWN_OTHER_PAYMENT_LINKS) —
-        // el síntoma de un link propio nuevo/no registrado. Dedup por link, 1/día.
-        const plink = verdict.observedPaymentLink || '';
-        if (plink && !knownOtherPaymentLinks(env).includes(plink)) {
-          await alertOnce(env, `other_product:${plink}`, 86400,
-            `⚠️ ${brandName(env)}: pago con payment_link NO reconocido (¿link desfasado?)`, [
-              `Llegó un pago cuyo payment_link NO coincide con el de ${brandName(env)} y fue IGNORADO.`,
-              '',
-              `payment_link observado: ${plink}`,
-              `email del comprador: ${sessionEmail(session) || '(sin email)'}`,
-              `monto: ${session.amount_total ?? session.amount ?? '?'} ${(session.currency || '').toUpperCase()}`,
-              '',
-              'Si este link es NUEVO de esta vertical (reprecio/nuevo checkout): tu',
-              'STRIPE_PAYMENT_LINK_ID está desfasado y estás perdiendo ventas EN',
-              'SILENCIO — agrégalo a STRIPE_PAYMENT_LINK_ID y redespliega.',
-              'Si es de OTRO producto de la cuenta compartida: agrégalo a',
-              'KNOWN_OTHER_PAYMENT_LINKS para silenciar este aviso.'
-            ]);
+        // FALLO SILENCIOSO #2: un payment_link propio que quedo desfasado (p. ej.
+        // tras un reprecio) cae aqui y el pago se ignora en silencio. PERO la
+        // cuenta de Stripe es COMPARTIDA entre productos: cada venta de un
+        // hermano tambien llega como other_product. Por eso solo se alerta de
+        // links DESCONOCIDOS -- ni el propio ni en KNOWN_OTHER_PAYMENT_LINKS --
+        // que es justo el sintoma de un link propio sin registrar.
+        {
+          const plink = verdict.observedPaymentLink || '';
+          if (plink && !knownOtherPaymentLinks(env).includes(plink)) {
+            await alertOnce(env, `other_product:${plink}`, 86400,
+              `${marca(env)}: pago con payment_link NO reconocido (link desfasado?)`, [
+                'Llego un pago cuyo payment_link NO coincide con el del producto y fue IGNORADO.',
+                '',
+                `payment_link observado: ${plink}`,
+                `esperados: ${verdict.expectedPaymentLinks.join(', ') || '(ninguno)'}`,
+                '',
+                'Si el link ES del producto, actualiza STRIPE_PAYMENT_LINK_ID.',
+                'Si es de otro producto de la cuenta compartida, agregalo a',
+                'KNOWN_OTHER_PAYMENT_LINKS para dejar de recibir este aviso.',
+              ]);
+          }
         }
         return jsonResponse({ ok: true, ignored: true, reason: 'other_product' });
-      }
       default:
         // Fail-closed también ante un motivo inesperado: no procesar.
         return jsonResponse({ ok: true, ignored: true, reason: verdict.reason });
@@ -312,6 +322,15 @@ async function handleStripeWebhook(request, env) {
       amount: amountTotal,
       currency,
       stripe_event_type: type,
+      // Slug del prospecto cuando la compra llegó por un link rastreado de Cory
+      // (client_reference_id, validado contra PROSPECT_SLUG_RE). Es la ÚNICA
+      // fuente de verdad de qué vista previa compró este cliente: viene de
+      // Stripe, no del formulario, así que no lo puede editar quien tenga la
+      // URL. La rama de catálogo de buildPublicPayload lo lee de aquí para que
+      // el workflow baje el payload.json correcto. En service-menu es un campo
+      // más en KV que nadie consulta todavía; se guarda igual porque el dato ya
+      // existía y perderlo obligaría a re-raspar el Instagram del cliente.
+      prospect_slug: prospectSlug(session) || '',
       status: 'paid',
       created_at: now
     }));
@@ -325,7 +344,7 @@ async function handleStripeWebhook(request, env) {
     return jsonResponse({ ok: true, paymentIntentId, hasEmail: false });
   }
 
-  if (!env.SENDGRID_API_KEY) {
+  if (!secret(env, 'SENDGRID_API_KEY')) {
     return jsonResponse({ ok: false, error: 'SENDGRID_API_KEY not configured' }, 500);
   }
 
@@ -425,7 +444,7 @@ async function handleTallyWebhook(request, env) {
     return jsonResponse({ ok: false, error: 'Could not read request body' }, 400);
   }
 
-  const secrets = [env.TALLY_SIGNING_SECRET_EN, env.TALLY_SIGNING_SECRET_ES].filter(Boolean);
+  const secrets = [secret(env, 'TALLY_SIGNING_SECRET_EN'), secret(env, 'TALLY_SIGNING_SECRET_ES')].filter(Boolean);
   if (secrets.length === 0) {
     return jsonResponse({ ok: false, error: 'Webhook signature validation not configured' }, 500);
   }
@@ -537,49 +556,36 @@ async function handleTallyWebhook(request, env) {
   // stay in the KV submission record and are never dispatched.
   const publicPayload = buildPublicPayload(normalized, incomingOrderId, env);
 
+  // Transporte del payload del catálogo, "opción A" (decisión de Vero 07-25):
+  // el slug del prospecto sale del REGISTRO DE LA ORDEN, donde lo dejó el
+  // client_reference_id del checkout de Stripe — no del formulario. Con él, el
+  // workflow baja de Cory el payload.json de la vista previa que el cliente ya
+  // vio. Leerlo de un hidden field de Tally sería dejar que cualquiera con la
+  // URL reclamara el catálogo de otro negocio.
+  if (publicPayload.template === 'catalog') {
+    publicPayload.prospect_slug = String(existingOrder.prospect_slug || '').trim();
+  }
+
   if (!publicPayload.business_name) {
     await env.SERVICE_MENU_KV.put(
       kvKey(env, 'incomplete_intake', incomingOrderId, normalized.submission_id),
       JSON.stringify({ order_id: incomingOrderId, submission_id: normalized.submission_id, missing: 'business_name', attempted_at: now }),
       { expirationTtl: 2592000 }
     ).catch(() => {});
-    // FALLO SILENCIOSO #4: intake sin campo obligatorio → página no se genera.
-    await alertOnce(env, `incomplete_intake:${normalized.submission_id}`, 604800,
-      `⚠️ ${brandName(env)}: intake incompleto — falta el nombre del negocio`, [
-        'Llegó un formulario de intake sin business_name (campo obligatorio).',
-        'La página NO se generó y el cliente no recibió nada.',
-        '',
-        `order_id: ${incomingOrderId}`,
-        `submission_id: ${normalized.submission_id}`,
-        'falta: business_name',
-        '',
-        'Acción: contactar al cliente para completar el dato, o revisar el mapeo',
-        'del formulario de Tally si el campo sí venía.'
-      ]);
     return jsonResponse({ ok: false, status: 'incomplete_intake', missing: 'business_name' }, 422);
   }
 
-  const hasContact = publicPayload.whatsapp || publicPayload.phone || publicPayload.public_email || publicPayload.booking_url || publicPayload.website;
-  if (!hasContact) {
+  // Qué es un intake "completo" depende de la plantilla: una tarjeta de
+  // contacto necesita un canal, un catálogo necesita su botón de venta y sus
+  // productos (ver missingFromIntake).
+  const missing = missingFromIntake(publicPayload, env);
+  if (missing) {
     await env.SERVICE_MENU_KV.put(
       kvKey(env, 'incomplete_intake', incomingOrderId, normalized.submission_id),
-      JSON.stringify({ order_id: incomingOrderId, submission_id: normalized.submission_id, missing: 'public_contact', attempted_at: now }),
+      JSON.stringify({ order_id: incomingOrderId, submission_id: normalized.submission_id, missing, attempted_at: now }),
       { expirationTtl: 2592000 }
     ).catch(() => {});
-    // FALLO SILENCIOSO #4 (bis): intake sin ningún contacto público.
-    await alertOnce(env, `incomplete_intake:${normalized.submission_id}`, 604800,
-      `⚠️ ${brandName(env)}: intake incompleto — sin contacto público`, [
-        'Llegó un formulario de intake sin ningún medio de contacto público',
-        '(WhatsApp / teléfono / email / reservas / web). La página NO se generó.',
-        '',
-        `order_id: ${incomingOrderId}`,
-        `submission_id: ${normalized.submission_id}`,
-        'falta: public_contact',
-        '',
-        'Acción: contactar al cliente para completar el dato, o revisar el mapeo',
-        'del formulario de Tally si el campo sí venía.'
-      ]);
-    return jsonResponse({ ok: false, status: 'incomplete_intake', missing: 'public_contact' }, 422);
+    return jsonResponse({ ok: false, status: 'incomplete_intake', missing }, 422);
   }
 
   // En una modificación se CONSERVA el slug de la página existente: si se
@@ -642,23 +648,21 @@ async function handleTallyWebhook(request, env) {
     console.error('github dispatch failed:', safeError(err));
     await env.SERVICE_MENU_KV.put(kvKey(env, 'order', incomingOrderId), JSON.stringify({
       ...existingOrder,
-      status: 'failed_dispatch',
+status: 'failed_dispatch',
       updated_at: now
     }));
-    // FALLO SILENCIOSO #3: pagó + llenó el formulario, pero el dispatch a
-    // GitHub Actions falló → su página no se genera y no hay reintento.
+    // FALLO SILENCIOSO #3: pago + formulario OK, pero el dispatch a GitHub
+    // Actions fallo -> el cliente pago y su pagina NO se esta generando. Aqui
+    // se responde 500 a proposito (para que Stripe reintente), asi que el
+    // dedup por-orden es CRITICO: aunque reintente, sale UNA alerta al dia.
     await alertOnce(env, `failed_dispatch:${incomingOrderId}`, 86400,
-      `⚠️ ${brandName(env)}: falló el dispatch de generación — ${slug}`, [
-        'El cliente pagó y llenó el formulario, pero el dispatch a GitHub Actions',
-        'falló: su página NO se está generando.',
+      `${marca(env)}: pago cobrado pero la generacion NO arranco`, [
+        'El cliente pago y su formulario llego, pero el dispatch a GitHub',
+        'Actions fallo: su pagina NO se esta generando.',
         '',
-        `order_id: ${incomingOrderId}`,
-        `submission_id: ${normalized.submission_id}`,
-        `slug: ${slug}`,
-        `error: ${safeError(err)}`,
+        `orden: ${incomingOrderId}`,
         '',
-        'La orden quedó en failed_dispatch (sin reintento automático).',
-        'Acción: re-disparar la generación o revisar el GITHUB_TOKEN del worker.'
+        'Revisa GITHUB_TOKEN y GITHUB_REPO en el worker.',
       ]);
     return jsonResponse({ ok: false, error: 'Failed to dispatch generation' }, 500);
   }
@@ -827,7 +831,7 @@ async function handleNotify(request, env) {
   }
 
   // Send delivery email
-  if (!env.SENDGRID_API_KEY) {
+  if (!secret(env, 'SENDGRID_API_KEY')) {
     return jsonResponse({ ok: false, error: 'SENDGRID_API_KEY not configured' }, 500);
   }
 
@@ -1013,7 +1017,7 @@ async function notifyModificationApplied({ env, slug, orderId, submissionId }) {
     }
   }
 
-  if (customerEmail && env.SENDGRID_API_KEY) {
+  if (customerEmail && secret(env, 'SENDGRID_API_KEY')) {
     try {
       await sendEmail({
         env,
@@ -1257,7 +1261,8 @@ async function handleBuyCorrection(url, env) {
   }
 
   const delivery = await env.SERVICE_MENU_KV.get(kvKey(env, 'delivery', slug), { type: 'json' }).catch(() => null);
-  if (!delivery || !env.STRIPE_SECRET_KEY) {
+  const stripeKey = secret(env, 'STRIPE_SECRET_KEY');
+  if (!delivery || !stripeKey) {
     return Response.redirect(unavailableUrl, 302);
   }
 
@@ -1293,7 +1298,7 @@ async function handleBuyCorrection(url, env) {
     const resp = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`,
+        'Authorization': `Bearer ${stripeKey}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: params.toString()
@@ -1505,23 +1510,33 @@ async function notifyAdmin(env, subject, lines) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ALERTAS DE EMBUDO MUERTO (Bloque A.3 de la auditoría 2026-07-21)
-// ─────────────────────────────────────────────────────────────────────────────
-// El embudo fallaba en silencio: un payment link desfasado → 200 {ignored} y un
-// console.log; "el cliente era el monitor". alertOnce conecta a los puntos de
-// fallo silencioso con dedup en KV para que un reintento de Stripe no dispare
-// una tormenta de correos.
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-// Destino de las alertas: ALERT_EMAIL si está configurado; si no, el buzón de
-// Vero (REPLY_TO_EMAIL) — así funcionan desde el primer deploy sin config nueva.
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILITY FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Nombre legible del producto para los correos de alerta. Sale de PRODUCT_ID
+ * para que un vertical exportado NO herede el nombre de HMU en sus avisos. */
+function marca(env) {
+  const id = String(env.PRODUCT_ID || 'el producto').trim();
+  return id.charAt(0).toUpperCase() + id.slice(1);
+}
+
 function alertEmail(env) {
   return (env.ALERT_EMAIL || env.REPLY_TO_EMAIL || '').trim();
 }
 
 // Payment links de OTROS productos de la cuenta Stripe compartida que ya sabemos
-// que no son de esta vertical: NO alertamos por ellos (evita el ruido de cada
-// venta de un producto hermano). Mismo formato coma-separado que STRIPE_PAYMENT_LINK_ID.
+// que no son del producto: NO alertamos por ellos (evita el ruido de cada venta de un
+// producto hermano). Mismo formato que STRIPE_PAYMENT_LINK_ID (coma-separado).
 function knownOtherPaymentLinks(env) {
   return (env.KNOWN_OTHER_PAYMENT_LINKS || '')
     .split(',')
@@ -1533,15 +1548,16 @@ function sessionEmail(session) {
   return session?.customer_email || session?.customer_details?.email || session?.receipt_email || '';
 }
 
-// Manda UN correo de alerta, deduplicado por `dedupId` durante `ttlSeconds`.
-// Reserva la llave <PRODUCT_ID>_alerted:<dedupId> ANTES de enviar: si dos
-// reintentos de Stripe entran a la vez, solo el primero manda el correo. Nunca
-// lanza: una alerta que falla no puede tumbar el flujo ni el 200 que Stripe espera.
-async function alertOnce(env, dedupId, ttlSeconds, subject, lines) {
+// Manda UN correo de alerta, deduplicado por `dedupKey` durante `ttlSeconds`.
+// Reserva la llave hmu_alerted:<dedupKey> ANTES de enviar: si dos reintentos de
+// Stripe entran a la vez, solo el primero pasa el chequeo y manda el correo.
+// Nunca lanza: una alerta que falla no puede tumbar el flujo del cliente ni el
+// 200 que Stripe espera.
+async function alertOnce(env, dedupKey, ttlSeconds, subject, lines) {
   try {
     const to = alertEmail(env);
     if (!to) return;
-    const key = kvKey(env, 'alerted', dedupId);
+    const key = `hmu_alerted:${dedupKey}`;
     const already = await env.SERVICE_MENU_KV.get(key).catch(() => null);
     if (already) return;
     // Reservar antes de enviar (idempotencia / rate-limit).
@@ -1561,7 +1577,8 @@ async function alertOnce(env, dedupId, ttlSeconds, subject, lines) {
 
 // POST /alert-generation-failed — lo llama el step `if: failure()` del workflow
 // de generación cuando la generación falla DESPUÉS de que el cliente pagó y
-// llenó el formulario. Autenticado con NOTIFY_SECRET, el mismo de /notify.
+// llenó el formulario (sin esto, un fallo de Actions dejaba la orden colgada y
+// nadie se enteraba). Autenticado con NOTIFY_SECRET, el mismo de /notify.
 async function handleGenerationFailedAlert(request, env) {
   const notifySecret = (env.NOTIFY_SECRET || '').trim();
   if (!notifySecret) {
@@ -1585,9 +1602,10 @@ async function handleGenerationFailedAlert(request, env) {
   const runUrl = cleanValue(body?.run_url);
   const reason = cleanValue(body?.reason) || 'La generación de la página falló en GitHub Actions.';
 
+  // Dedup por el identificador más específico disponible.
   const dedup = `genfail:${correctionId || submissionId || slug || runUrl || 'unknown'}`;
   await alertOnce(env, dedup, 86400,
-    `⚠️ ${brandName(env)}: la generación FALLÓ — ${slug || submissionId || 'sin id'}`, [
+    `⚠️ HMU: la generación FALLÓ — ${slug || submissionId || 'sin id'}`, [
       'La generación de la página falló DESPUÉS del pago + formulario.',
       'El cliente pagó y llenó el intake, pero su página no se generó.',
       '',
@@ -1603,34 +1621,6 @@ async function handleGenerationFailedAlert(request, env) {
   return jsonResponse({ ok: true });
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// UTILITY FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Event Webhook del proveedor de correo (SendGrid): avisa cuando un correo de
- * ENTREGA rebota o se descarta.
- *
- * Es el ultimo fallo silencioso del embudo que quedaba sin cubrir, y el peor de
- * todos: el cliente PAGO, el sistema genero su pagina y mando el correo... que
- * nunca llego (buzon lleno, direccion mal escrita, filtro de spam). Sin esto,
- * Vero se entera cuando el cliente reclama -- o nunca.
- *
- * Seguridad: endpoint PUBLICO, asi que exige la firma ECDSA de SendGrid
- * (`X-Twilio-Email-Event-Webhook-Signature` + `-Timestamp`, clave publica en
- * `SENDGRID_WEBHOOK_PUBLIC_KEY`). Sin clave configurada NO se procesa nada: se
- * responde 503 en vez de aceptar eventos sin verificar, que seria una puerta
- * abierta a que cualquiera dispare correos de alerta.
- */
 const EMAIL_FAILURE_EVENTS = new Set(['bounce', 'dropped', 'blocked', 'spamreport']);
 
 /**
@@ -1816,7 +1806,8 @@ async function verifyTallySignature(rawBody, signatureHeader, secret) {
 }
 
 async function dispatchGitHubAction(env, payload) {
-  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
+  const githubToken = secret(env, 'GITHUB_TOKEN');
+  if (!githubToken || !env.GITHUB_REPO) {
     throw new Error('GITHUB_TOKEN or GITHUB_REPO not configured');
   }
 
@@ -1826,7 +1817,7 @@ async function dispatchGitHubAction(env, payload) {
   const response = await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
+      'Authorization': `Bearer ${githubToken}`,
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json',
       // GitHub API rechaza con 403 cualquier request sin User-Agent.
@@ -1843,6 +1834,29 @@ async function dispatchGitHubAction(env, payload) {
   }
 }
 
+/**
+ * Limitador de ritmo BEST-EFFORT. No es un control de seguridad.
+ *
+ * Decision formal del hallazgo #5 de la auditoria del 2026-07-23, que ofrecia
+ * dos salidas: migrarlo a Durable Object o aceptarlo documentado. Se acepta
+ * documentado, y estas son las razones:
+ *
+ *  1. NO es la barrera. Cada ruta que pasa por aqui tiene un segundo candado
+ *     REAL detras: firma HMAC en /stripe/webhook y /tally-webhook, token de
+ *     256 bits en /correct y /correction-status, Bearer en /notify. Si este
+ *     limitador desapareciera, nadie entraria: solo llegaria mas ruido.
+ *  2. Falla-ABIERTO a proposito. Si KV tiene un hipo, el .catch() deja pasar.
+ *     Fallar-cerrado seria PEOR: bloquearia webhooks de Stripe legitimos, es
+ *     decir, pagos de clientes reales que no se procesarian.
+ *  3. Es por IP y no es atomico (lee-luego-escribe), asi que quien rote IPs lo
+ *     esquiva y varias peticiones simultaneas pueden contar de menos. Ambas
+ *     cosas se ACEPTAN: mitigarlas de verdad exigiria un Durable Object
+ *     -- binding nuevo, migracion y redeploy de 5 workers -- para endurecer
+ *     algo que no es lo que detiene a nadie.
+ *
+ * Si algun dia una ruta que GASTA dinero queda sin segundo candado, esta
+ * decision se revisa: ahi si haria falta un limitador de verdad.
+ */
 async function checkRateLimit(env, key, limit, ttl) {
   const current = await env.SERVICE_MENU_KV.get(key, { type: 'json' }).catch(() => null);
   const count = (current?.count || 0) + 1;
@@ -1854,7 +1868,8 @@ async function checkRateLimit(env, key, limit, ttl) {
 }
 
 async function sendEmail({ env, to, subject, html, text, attachments }) {
-  if (!env.SENDGRID_API_KEY) {
+  const sendgridKey = secret(env, 'SENDGRID_API_KEY');
+  if (!sendgridKey) {
     throw new Error('SENDGRID_API_KEY not configured');
   }
 
@@ -1895,7 +1910,7 @@ async function sendEmail({ env, to, subject, html, text, attachments }) {
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${env.SENDGRID_API_KEY}`,
+      'Authorization': `Bearer ${sendgridKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(body)
@@ -2170,21 +2185,25 @@ function normalizePrimaryCta(value) {
   return aliases[normalized] || '';
 }
 
-// Mapea las respuestas del intake (formularios EN/ES de la vertical) al
-// payload público que consume el generador. SOLO campos públicos aprobados:
-// los datos internos (nombre de contacto, teléfono privado, notas "keep off")
-// se quedan en KV y nunca se despachan a GitHub Actions.
-//
-// Los alias de título por campo (FIELD_ALIASES) viven en tally-field-aliases.json
-// — única fuente de verdad, compartida con create_tally_forms.py --check-mapping.
-// Aquí solo quedan las transformaciones no-triviales (estilo, idioma, slug, CTA,
-// archivos, fallbacks answerContains). `env` aporta el catálogo de estilos válido
-// de la vertical (validBrandStyles); sin él, cae a los 12 de HMU.
-function buildPublicPayload(normalized, orderId, env) {
+// Lo que TODA página necesita, sea del tipo que sea: estilo, idioma, nombre del
+// negocio y slug público. Sale de aquí (y no duplicado en cada rama) porque las
+// cuatro derivaciones son transformaciones delicadas — el estilo cae a un
+// fallback marcado, el idioma tiene una regla de precedencia de tres niveles, y
+// el slug es lo que hace que una modificación no publique una página nueva. Una
+// segunda copia de esto es una copia que se queda atrás.
+function intakeIdentity(normalized, orderId, env) {
   const a = normalized.answers;
 
+  // El separador entre el NOMBRE del estilo y su descripción es la raya (— o –),
+  // nunca el guion normal: un nombre de estilo LO LLEVA DENTRO ('sunny-paws',
+  // 'warm-sand'), porque el catálogo de cada vertical son slugs. Incluir '-' aquí
+  // (como estaba hasta el 2026-07-25) cortaba 'sunny-paws — alegre y jugueton' en
+  // 'sunny', que no existe en ninguna vertical: PawContact entero caía a
+  // fallbackBrandStyle y sus 4 opciones entregaban la MISMA página warm-sand.
+  // Si alguna vertical vuelve a usar guion como separador,
+  // `create_tally_forms.py --check-mapping` lo caza antes del deploy.
   const styleRaw = answerAny(a, FIELD_ALIASES.pick_your_style);
-  const styleName = styleRaw.split(/[—–-]/)[0] || '';
+  const styleName = styleRaw.split(/[—–]/)[0] || '';
   let brandStyle = slugify(styleName);
   let styleUnmapped = false;
   const validStyles = validBrandStyles(env || {});
@@ -2209,6 +2228,30 @@ function buildPublicPayload(normalized, orderId, env) {
   const suffix = String(normalized.submission_id || orderId || '')
     .toLowerCase().replace(/[^a-z0-9]/g, '').slice(-7) || 'x0';
   const publicSlug = `${slugify(businessName) || 'hmu-page'}-${suffix}`;
+
+  return { brandStyle, styleUnmapped, defaultLanguage, businessName, publicSlug };
+}
+
+// Mapea las respuestas del intake (formularios EN/ES de la vertical) al
+// payload público que consume el generador. SOLO campos públicos aprobados:
+// los datos internos (nombre de contacto, teléfono privado, notas "keep off")
+// se quedan en KV y nunca se despachan a GitHub Actions.
+//
+// Los alias de título por campo (FIELD_ALIASES) viven en tally-field-aliases.json
+// — única fuente de verdad, compartida con create_tally_forms.py --check-mapping.
+// Aquí solo quedan las transformaciones no-triviales (estilo, idioma, slug, CTA,
+// archivos, fallbacks answerContains). `env` aporta el catálogo de estilos válido
+// de la vertical (validBrandStyles); sin él, cae a los 12 de HMU.
+function buildPublicPayload(normalized, orderId, env) {
+  // La plantilla decide QUÉ campos se extraen. `service-menu` es el default y su
+  // rama es la de siempre, sin un byte de cambio: los 5 workers desplegados no
+  // declaran TEMPLATE, así que caen aquí igual que ayer.
+  if (pageTemplate(env) === 'catalog') {
+    return buildCatalogPublicPayload(normalized, orderId, env);
+  }
+  const a = normalized.answers;
+  const { brandStyle, styleUnmapped, defaultLanguage, businessName, publicSlug } =
+    intakeIdentity(normalized, orderId, env);
 
   return {
     public_slug: publicSlug,
@@ -2264,6 +2307,83 @@ function buildPublicPayload(normalized, orderId, env) {
     location_3_notes: answerAny(a, FIELD_ALIASES.location_3_notes),
     additional_locations_text: answerAny(a, FIELD_ALIASES.additional_locations_text)
   };
+}
+
+// Rama de la plantilla `catalog` (The Catalog Link, F6 bloque 2).
+//
+// Un catálogo NO es un menú de servicios con otra hoja de estilos: no tiene
+// ocho canales de contacto, ni horarios, ni sucursales, ni FAQ — tiene
+// PRODUCTOS y UN botón de venta. Extraer aquí los 47 campos de service-menu
+// llenaría el payload de cadenas vacías y, peor, dejaría al generador del
+// catálogo sin lo único que le importa. Por eso es una rama y no una suma de
+// campos opcionales.
+//
+// El formulario del claim tiene DOS caminos (decisión de Vero del 07-24) y este
+// payload sirve a los dos:
+//   - PRELLENADO: el negocio ya vio su vista previa. Solo confirma y elige su
+//     botón de venta. Sus ~20 productos con fotos NO viajan por el formulario
+//     (no caben en un prefill de Tally, que va por query string): viven en Cory
+//     y el workflow los baja por slug — transporte "opción A", decidido el
+//     07-25. Por eso este payload lleva `prospect_slug` y no `products`.
+//   - ORGÁNICO: llegó por la tienda sin vista previa y captura lo suyo. Ahí sí
+//     viajan `products_text` (una línea por producto) y las fotos que subió a
+//     Tally, que build_client_from_intake parsea igual que hace hoy con
+//     `services_text`.
+//
+// `prospect_slug` NO se lee del formulario a propósito: se rellena en el
+// call-site desde el registro de la orden, donde lo puso el
+// `client_reference_id` del checkout de Stripe. Un hidden field de Tally lo
+// puede editar cualquiera con la URL, y con eso se reclamaría el catálogo de
+// otro negocio.
+function buildCatalogPublicPayload(normalized, orderId, env) {
+  const a = normalized.answers;
+  const { brandStyle, styleUnmapped, defaultLanguage, businessName, publicSlug } =
+    intakeIdentity(normalized, orderId, env);
+
+  const saleKind = normalizeSaleKind(answerAny(a, FIELD_ALIASES.sale_button_kind));
+  const saleValue = normalizeSaleValue(answerAny(a, FIELD_ALIASES.sale_button_value));
+
+  return {
+    template: 'catalog',
+    public_slug: publicSlug,
+    default_language: defaultLanguage,
+    brand_style: brandStyle,
+    style_unmapped: styleUnmapped,
+    business_name: businessName,
+    short_description: answerAny(a, FIELD_ALIASES.short_description),
+    address: answerAny(a, FIELD_ALIASES.address),
+    // El generador exige sale_button.kind válido y un value que produzca enlace;
+    // se manda lo que haya (aunque venga incompleto) para que el gate de intake
+    // del call-site pueda decir exactamente qué faltó, en vez de que el
+    // generador falle después con un payload que ya nadie puede inspeccionar.
+    sale_button: { kind: saleKind, value: saleValue },
+    catalog_mode: answerAny(a, FIELD_ALIASES.catalog_mode),
+    products_text: answerAny(a, FIELD_ALIASES.products_text),
+    // 20 = el tope de productos por catálogo que fijó F2.
+    product_image_urls: answerFileUrls(a, FIELD_ALIASES.product_image_urls, 20),
+    logo_url: answerFileUrl(a, FIELD_ALIASES.logo_url),
+    prospect_slug: ''
+  };
+}
+
+// ¿Este intake trae lo mínimo para publicar? Cambia por plantilla: en
+// service-menu el mínimo es UN canal de contacto (la página es una tarjeta de
+// contacto); en el catálogo es el botón de venta (sin él, las tarjetas de
+// producto no llevan a ningún lado) MÁS una fuente de productos — la vista
+// previa de Cory (prospect_slug) o lo que el cliente escribió.
+//
+// Devuelve '' si está completo, o el nombre de lo que falta (el mismo string
+// que ya viajaba en el 422 `incomplete_intake`).
+function missingFromIntake(payload, env) {
+  if (pageTemplate(env) !== 'catalog') {
+    const hasContact = payload.whatsapp || payload.phone || payload.public_email
+      || payload.booking_url || payload.website;
+    return hasContact ? '' : 'public_contact';
+  }
+  const sale = payload.sale_button || {};
+  if (!SALE_BUTTON_KINDS.includes(sale.kind) || !sale.value) return 'sale_button';
+  if (!payload.prospect_slug && !payload.products_text) return 'products';
+  return '';
 }
 
 function cleanValue(val) {

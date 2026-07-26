@@ -53,7 +53,7 @@ try:
 except ImportError:  # pragma: no cover - clear guidance if dependency missing
     segno = None
 
-from blocks import block_enabled
+from blocks import block_enabled, fill_tokens
 from vertical_config import (
     BLOCKS, BRAND_NAME, DOMAIN, LEGAL, STRINGS, STYLES_CATALOG,
 )
@@ -1218,10 +1218,9 @@ def render_view(
         "{{SKIP_LINK_BLOCK}}": f'<a class="skip" href="#content">{esc(s["skip_to_content"])}</a>',
     }
 
-    out = template
-    for token, value in tokens.items():
-        out = out.replace(token, value)
-    return out
+    # Una sola pasada (hallazgo #17): un dato del negocio que contenga
+    # literalmente otro token ya no se re-expande.
+    return fill_tokens(template, tokens)
 
 
 # --------------------------------------------------------------------------- #

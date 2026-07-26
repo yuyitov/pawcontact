@@ -31,6 +31,7 @@ any business type may add extra photos; a vertical can still narrow it via
 from __future__ import annotations
 
 import copy
+import re
 
 # Engine defaults, extracted verbatim from the HMU generator so the golden
 # output stays byte-identical when a vertical defines no `blocks:` overrides.
@@ -115,3 +116,31 @@ def block_enabled(blocks: dict, block_id: str, business_type) -> bool:
     if btype in _GENERAL:
         return True
     return btype in enabled_for
+
+
+# --------------------------------------------------------------------------- #
+# Sustitución de tokens de plantilla — UNA sola pasada
+# --------------------------------------------------------------------------- #
+def fill_tokens(template: str, tokens: dict) -> str:
+    """Sustituye `{{TOKEN}}` por su valor en UNA pasada.
+
+    Antes esto era un `for token, value: out = out.replace(token, value)`
+    secuencial (hallazgo #17 de la auditoría de ataque del 2026-07-23). El
+    problema: el valor que entra en la pasada N vuelve a mirarse en la N+1, así
+    que un dato del negocio que contenga literalmente `{{PRODUCT_CARDS}}` se
+    RE-EXPANDE con el bloque del motor. Hoy no es explotable —lo que se
+    reinyecta es HTML que el propio motor ya escapó, no markup del atacante—
+    pero es un pie puesto para que el día de mañana sí lo sea, y produce
+    páginas mal armadas sin avisar.
+
+    Con una pasada, lo que salga de un token queda tal cual: el texto del
+    negocio nunca puede volverse plantilla.
+
+    Los tokens desconocidos se dejan intactos a propósito: quien valida que no
+    queden `{{...}}` sin resolver es el llamador (store.py lo hace y falla), y
+    tragárselos aquí escondería el error.
+    """
+    if not tokens:
+        return template
+    patron = re.compile("|".join(re.escape(t) for t in sorted(tokens, key=len, reverse=True)))
+    return patron.sub(lambda m: str(tokens[m.group(0)]), template)

@@ -20,7 +20,7 @@
   "primary_cta": ["featured_button", "primary_button", "main_button", "preferred_button", "highlight_button", "call_to_action_button", "which_button_should_be_featured", "which_button_should_stand_out_on_your_page", "which_button_should_be_the_main_button", "which_one_should_be_the_main_button", "boton_destacado", "boton_principal", "boton_a_destacar", "que_boton_quieres_destacar", "que_boton_debe_destacar", "que_boton_debe_ser_el_principal", "cual_debe_ser_el_boton_principal"],
   "google_maps_url": ["location_1_google_maps_link", "ubicacion_1_enlace_de_google_maps"],
   "google_reviews_url": ["google_reviews_link", "enlace_de_google_reviews"],
-  "address": ["location_1_public_address", "ubicacion_1_direccion_publica"],
+  "address": ["location_1_public_address", "ubicacion_1_direccion_publica", "public_address", "direccion_publica"],
   "location_1_notes": ["location_1_notes", "ubicacion_1_notas"],
   "service_area_text": ["where_do_you_offer_your_services", "donde_ofreces_tus_servicios", "what_areas_do_you_cover", "que_zonas_cubres"],
   "client_care_text": ["how_do_clients_get_service", "como_atiendes_a_tus_clientes", "do_you_work_with_clients_online_in_person_or_both", "trabajas_con_clientes_en_linea_en_persona_o_ambas", "how_do_you_serve_your_clients", "how_do_you_work_with_clients", "how_do_you_attend_to_your_clients"],
@@ -47,5 +47,12 @@
   "location_3_address": ["location_3_public_address", "ubicacion_3_direccion_publica"],
   "location_3_maps_url": ["location_3_google_maps_link", "ubicacion_3_enlace_de_google_maps"],
   "location_3_notes": ["location_3_phone_whatsapp_or_hours_if_different", "ubicacion_3_telefono_whatsapp_u_horarios_si_son_diferentes"],
-  "additional_locations_text": ["additional_locations", "ubicaciones_adicionales"]
+  "additional_locations_text": ["additional_locations", "ubicaciones_adicionales"],
+
+  "_comment_catalog": "A partir de aquí, campos de la plantilla `catalog` (The Catalog Link, F6 bloque 2). Los lee la rama de catálogo de buildPublicPayload y NINGUNA vertical de service-menu los pregunta, así que su presencia aquí no cambia un byte del intake de HMU/ModaLink/Dr Link/PawContact/My Guest: answerAny sobre un alias que nadie contesta devuelve ''. OJO con dos que NO están aquí porque ya existen y se reúsan tal cual: el ESTILO entra por `pick_your_style` (las opciones del catálogo son vitrina-*/revista-*/elegante-*, y el catálogo de estilos válido lo pone VALID_BRAND_STYLES por vertical), y el idioma por `default_language`.",
+  "catalog_mode": ["do_you_already_have_your_sample_catalog", "ya_tienes_tu_catalogo_de_muestra"],
+  "sale_button_kind": ["how_should_customers_place_orders", "como_quieres_que_te_hagan_los_pedidos"],
+  "sale_button_value": ["number_for_that_button", "numero_para_ese_boton"],
+  "products_text": ["your_products_one_per_line", "tus_productos_uno_por_linea"],
+  "product_image_urls": ["photos_of_your_products", "fotos_de_tus_productos"]
 }

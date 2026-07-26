@@ -69,6 +69,29 @@ BASE_STRINGS = {
         "footer_demo_credit": "Demo hecho con {brand_name}",
         "qr_alt": "Codigo QR de",
         "lang_switch": "View this page in English",
+        # --- Catálogo (plantilla F4). Claves solo usadas por la plantilla
+        # catalog; la plantilla service-menu no las referencia, así que
+        # agregarlas no toca el golden de HMU. ---
+        "catalog_title_suffix": "Catálogo",
+        "catalog_search_placeholder": "Buscar en el catálogo…",
+        "catalog_search_label": "Buscar productos",
+        "catalog_filter_all": "Todo",
+        "catalog_no_results": "No encontramos productos con esa búsqueda.",
+        "catalog_products_eyebrow": "Catálogo",
+        "catalog_products_title_html": "Nuestros <em>productos</em>",
+        # "Preguntar precio" es la NORMA en este nicho (los negocios chicos no
+        # publican precio en IG), no un hueco: se muestra como una pastilla
+        # intencional, no como un error.
+        "catalog_ask_price": "Preguntar precio",
+        "catalog_sale_whatsapp": "Pedir por WhatsApp",
+        "catalog_sale_sms": "Pedir por mensaje",
+        "catalog_sale_tel": "Llamar para pedir",
+        "catalog_sale_generic": "Hacer un pedido",
+        "catalog_product_cta": "Preguntar por este",
+        "catalog_results_count_one": "1 producto",
+        # {{n}} sobrevive el .format(brand_name=...) de build_strings como el
+        # literal {n}, que el JS del catálogo reemplaza por el conteo.
+        "catalog_results_count_many": "{{n}} productos",
     },
     "en": {
         "title_suffix": "Services",
@@ -120,5 +143,102 @@ BASE_STRINGS = {
         "footer_demo_credit": "Demo made with {brand_name}",
         "qr_alt": "QR code for",
         "lang_switch": "Ver esta página en español",
+        # --- Catalog (F4 template). Keys used only by the catalog template. ---
+        "catalog_title_suffix": "Catalog",
+        "catalog_search_placeholder": "Search the catalog…",
+        "catalog_search_label": "Search products",
+        "catalog_filter_all": "All",
+        "catalog_no_results": "No products match that search.",
+        "catalog_products_eyebrow": "Catalog",
+        "catalog_products_title_html": "Our <em>products</em>",
+        # "Ask for price" is the NORM in this niche (small shops don't post
+        # prices on IG), not a gap: shown as an intentional pill, not an error.
+        "catalog_ask_price": "Ask for price",
+        "catalog_sale_whatsapp": "Order on WhatsApp",
+        "catalog_sale_sms": "Order by text",
+        "catalog_sale_tel": "Call to order",
+        "catalog_sale_generic": "Place an order",
+        "catalog_product_cta": "Ask about this",
+        "catalog_results_count_one": "1 product",
+        "catalog_results_count_many": "{{n}} products",
     },
+}
+
+# --------------------------------------------------------------------------- #
+# ES→EN de CATEGORÍAS del catálogo (F4 paso 3).
+# --------------------------------------------------------------------------- #
+# F2 (extract_products) entrega la categoría del producto SOLO en español (es
+# una etiqueta corta por tipo de producto: "Tablas", "Ramos", "Talleres"…). El
+# badge y el chip del catálogo deben salir en inglés cuando la página está en
+# inglés (mismo espíritu i18n de la fábrica). Como las categorías son abiertas
+# (las genera el modelo), no caben en BASE_STRINGS: este es un diccionario de
+# traducción por VOCABULARIO del nicho, consultado en tiempo de render.
+#
+# Clave = categoría en español NORMALIZADA (minúsculas, sin acentos, sin
+# espacios extra — la misma normalización que `_plain` en generate_catalog).
+# Se cubren singular y plural porque la normalización NO singulariza. Si una
+# categoría no está aquí, el generador cae de forma elegante a la etiqueta en
+# español (mejor una palabra en español que un hueco). Ampliar esta tabla es
+# aditivo y no toca a ninguna otra vertical (no forma parte de BASE_STRINGS).
+CATALOG_CATEGORY_EN = {
+    # genéricos / transversales
+    "talleres": "Workshops", "taller": "Workshop",
+    "cursos": "Courses", "curso": "Course",
+    "clases": "Classes", "clase": "Class",
+    "regalos": "Gifts", "regalo": "Gift",
+    "detalles": "Gifts", "detalle": "Gift",
+    "cajas": "Boxes", "caja": "Box",
+    "canastas": "Baskets", "canasta": "Basket",
+    "combos": "Combos", "combo": "Combo",
+    "paquetes": "Packages", "paquete": "Package",
+    "promociones": "Deals", "promocion": "Deal",
+    "temporada": "Seasonal", "temporadas": "Seasonal",
+    "accesorios": "Accessories", "accesorio": "Accessory",
+    "personalizados": "Personalized", "personalizado": "Personalized",
+    # repostería / postres
+    "pasteles": "Cakes", "pastel": "Cake",
+    "postres": "Desserts", "postre": "Dessert",
+    "galletas": "Cookies", "galleta": "Cookie",
+    "cupcakes": "Cupcakes", "cupcake": "Cupcake",
+    "gelatinas": "Jellies", "gelatina": "Jelly",
+    "panques": "Loaf cakes", "panque": "Loaf cake",
+    "pan": "Bread", "panes": "Breads", "panaderia": "Bakery",
+    "cheesecakes": "Cheesecakes", "cheesecake": "Cheesecake",
+    "reposteria": "Pastries", "brownies": "Brownies", "brownie": "Brownie",
+    # fresas / chocolate
+    "fresas con chocolate": "Chocolate strawberries",
+    "chocofresas": "Chocolate strawberries",
+    "fresas": "Strawberries", "fresa": "Strawberry",
+    "chocolates": "Chocolates", "chocolate": "Chocolate",
+    "antojos": "Treats", "antojo": "Treat",
+    # florería
+    "ramos": "Bouquets", "ramo": "Bouquet",
+    "arreglos": "Arrangements", "arreglo": "Arrangement",
+    "arreglos florales": "Floral arrangements",
+    "flores": "Flowers", "flor": "Flower",
+    "coronas": "Wreaths", "corona": "Wreath",
+    "plantas": "Plants", "planta": "Plant",
+    "suculentas": "Succulents", "suculenta": "Succulent",
+    "globos": "Balloons", "globo": "Balloon",
+    # charcutería / gourmet
+    "tablas": "Boards", "tabla": "Board",
+    "charcuteria": "Charcuterie",
+    "quesos": "Cheeses", "queso": "Cheese",
+    "snacks": "Snacks", "snack": "Snack",
+    "desayunos": "Breakfasts", "desayuno": "Breakfast",
+    "bebidas": "Drinks", "bebida": "Drink",
+    "gourmet": "Gourmet",
+    # joyería / velas / perfumería (Elegante)
+    "joyeria": "Jewelry", "joyas": "Jewelry", "joya": "Jewelry",
+    "aretes": "Earrings", "arete": "Earring",
+    "collares": "Necklaces", "collar": "Necklace",
+    "anillos": "Rings", "anillo": "Ring",
+    "pulseras": "Bracelets", "pulsera": "Bracelet",
+    "dijes": "Charms", "dije": "Charm",
+    "relojes": "Watches", "reloj": "Watch",
+    "velas": "Candles", "vela": "Candle",
+    "jabones": "Soaps", "jabon": "Soap",
+    "perfumes": "Perfumes", "perfume": "Perfume",
+    "aromas": "Scents", "aroma": "Scent",
+    "bisuteria": "Costume jewelry",
 }
