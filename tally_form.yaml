@@ -9,31 +9,36 @@
 # default_language is intentionally NOT asked here: engine/worker/worker.js
 # derives it from which form (ES/EN) was submitted when unanswered (see
 # DATA_CONTRACT.md § Contrato A), which is documented, legitimate behavior —
-# not a workaround. Reason for skipping it: the only alias pair the engine
-# has for an explicit language question is
-# ['which_language_should_your_hmu_link_show_first',
-#  'en_que_idioma_debe_aparecer_primero_tu_hmu_link'] — the literal brand
-# "hmu_link" is baked into engine/worker/tally-field-aliases.json (a
-# generic/shared file, copied verbatim into every vertical's worker/ by
-# export_vertical.py). Asking "your PawContact link" wouldn't match it. This
-# is a real gap worth fixing at the engine level for any future vertical that
-# WANTS an explicit language question — flagged for Vero, not fixed in this
-# session (it doesn't block PawContact, which relies on the form-origin
-# fallback instead).
+# not a workaround, and it's simpler than adding a question. Note this is now
+# a choice, not a limitation: as of Fase 2.5, the explicit language-question
+# alias is derived from BRAND_NAME at runtime
+# (engine/worker/product-config.mjs::languageQuestionAliases), so "Which
+# language should your PawContact show first?" WOULD match automatically if
+# this vertical ever wants to ask it explicitly — no engine/JSON edit needed.
 
 form_title:
   es: "PawContact — Cuestionario de tu negocio"
   en: "PawContact — Your business questionnaire"
 
+# Cada pregunta declara `name:`: el field name ESTABLE con el que Tally guarda
+# esa respuesta. Es deliberadamente el MISMO en el formulario ES y en el EN, y
+# coincide con el campo del public_payload del worker (ver
+# engine/worker/tally-field-aliases.json) cuando la pregunta mapea a uno. Eso es
+# lo que permite prellenar el formulario cuando el cliente pide una MODIFICACION
+# (Ola 1c): se arma la URL con estos nombres. Antes el field name se derivaba del
+# titulo (nk(titulo)), asi que divergia entre idiomas y se movia con cualquier
+# cambio de wording — prellenar era imposible.
 questions:
   # --- Identidad del negocio ---
   - id: business_name
     type: text
+    name: business_name
     required: true
     title: {es: "Nombre del negocio", en: "Business name"}
 
   - id: brand_style
     type: dropdown
+    name: pick_your_style
     required: true
     title: {es: "Elige tu estilo", en: "Pick your style"}
     options:
@@ -55,6 +60,7 @@ questions:
   # vets can still show a before/after or facility gallery.
   - id: business_type
     type: dropdown
+    name: business_type
     title: {es: "¿Qué tipo de negocio es?", en: "What type of business is it?"}
     options:
       - {es: "Estética canina para mascotas", en: "Pet grooming"}
@@ -65,45 +71,73 @@ questions:
 
   - id: short_description
     type: textarea
+    name: short_description
     required: true
     title: {es: "Describe tu negocio en 1-2 frases", en: "Describe your business in 1-2 sentences"}
 
   # --- Contacto (WhatsApp cubre el minimo de contacto que exige el Worker) ---
   - id: whatsapp
     type: phone
+    name: whatsapp
     required: true
     title: {es: "WhatsApp público para tus clientes", en: "Public WhatsApp number for clients"}
 
   - id: phone
     type: phone
+    name: phone
     title: {es: "Teléfono público para llamadas", en: "Public phone number for calls"}
 
   - id: public_email
     type: email
+    name: public_email
     title: {es: "Correo público", en: "Public email"}
 
   - id: website
     type: link
+    name: website
     title: {es: "Sitio web", en: "Website"}
 
   - id: booking_url
     type: link
+    name: booking_url
     title: {es: "Enlace externo de reservas", en: "External booking link"}
 
+  # Las tres redes son `text` y NO `link` a proposito (hallazgo de Vero,
+  # 2026-07-26, llenando el formulario con un negocio real). `link` monta el
+  # INPUT_LINK de Tally, que EXIGE una URL y rechaza "@puppy_patch_pv" — y el
+  # usuario es justo lo que la gente sabe de memoria y comparte. El generador
+  # ya aceptaba el handle desde siempre (build_client_from_intake.social_url
+  # convierte @usuario -> https://instagram.com/usuario, tambien "usuario" a
+  # secas y "instagram.com/usuario"); el unico que lo rechazaba era el
+  # formulario. Bajar la validacion no pierde nada: lo que llegue mal formado
+  # ya se descartaba despues.
   - id: instagram
-    type: link
+    type: text
+    name: instagram
     title: {es: "Instagram", en: "Instagram"}
+    placeholder:
+      es: "@tu_usuario o el enlace completo"
+      en: "@your_handle or the full link"
 
   - id: facebook
-    type: link
+    type: text
+    name: facebook
     title: {es: "Facebook", en: "Facebook"}
+    placeholder:
+      es: "@tu_pagina o el enlace completo"
+      en: "@your_page or the full link"
 
   - id: tiktok
-    type: link
+    type: text
+    name: tiktok
     title: {es: "TikTok", en: "TikTok"}
+    placeholder:
+      es: "@tu_usuario o el enlace completo"
+      en: "@your_handle or the full link"
 
   - id: primary_cta
     type: dropdown
+    name: primary_cta
     title: {es: "¿Qué botón quieres destacar?", en: "Which button should be featured?"}
     options:
       - {es: "WhatsApp", en: "WhatsApp"}
@@ -115,6 +149,7 @@ questions:
   # --- Servicios y precios ---
   - id: services_text
     type: textarea
+    name: services_text
     required: true
     title: {es: "Lista tus servicios con precios", en: "List your services with prices"}
     placeholder:
@@ -123,6 +158,7 @@ questions:
 
   - id: price_display
     type: dropdown
+    name: price_display
     title:
       es: "¿Cómo deben aparecer los precios en tu página pública?"
       en: "How should prices appear on your public page?"
@@ -133,64 +169,102 @@ questions:
 
   - id: featured_text
     type: textarea
+    name: featured_text
     title:
       es: "Paquete destacado, promoción u oferta especial"
       en: "Featured package, promo, or signature offer"
 
   - id: policies_text
     type: textarea
+    name: policies_text
     title: {es: "Políticas que tus clientes deben ver", en: "Policies your clients should see"}
 
   - id: faq_text
     type: textarea
+    name: faq_text
     title: {es: "Preguntas frecuentes", en: "Frequently asked questions"}
 
   # --- Horarios y ubicación ---
   - id: opening_hours_text
     type: textarea
+    name: opening_hours_text
     required: true
     title: {es: "¿Cuáles son tus horarios de atención?", en: "What are your business hours?"}
 
   - id: address
     type: text
+    name: address
     title: {es: "Ubicación 1 dirección pública", en: "Location 1 public address"}
 
   - id: google_maps_url
     type: link
+    name: google_maps_url
     title: {es: "Ubicación 1 enlace de Google Maps", en: "Location 1 Google Maps link"}
 
   - id: google_reviews_url
     type: link
+    name: google_reviews_url
     title: {es: "Enlace de Google Reviews", en: "Google Reviews link"}
 
   - id: delivery_pickup_links_text
     type: textarea
+    name: delivery_pickup_links_text
     title: {es: "Links de delivery / pickup", en: "Delivery / pickup links"}
     placeholder:
       es: "Solo si aplica (boutiques). Ej: Rappi — https://rappi.com/tu-tienda"
       en: "Only if it applies (boutiques). E.g.: Rappi — https://rappi.com/your-store"
 
+  # El titulo dice QUE poner, no como se llama el campo (hallazgo de Vero,
+  # 2026-07-26: "Enlace de portafolio" no dice nada). El placeholder ya
+  # existia y no bastó: en un INPUT_LINK compite con la pista de URL del
+  # propio Tally y se lee como ejemplo, no como instruccion. Los titulos
+  # nuevos estan dados de alta en tally-field-aliases.json, asi que el worker
+  # sigue reconociendo la respuesta por titulo ademas de por `name`.
   - id: portfolio_link
     type: link
-    title: {es: "Enlace de portafolio", en: "Portfolio link"}
+    name: portfolio_link
+    title:
+      es: "Enlace a fotos de tu trabajo (opcional)"
+      en: "Link to photos of your work (optional)"
     placeholder:
-      es: "Antes/después, instalaciones, o tu feed de Instagram"
-      en: "Before/after work, your facility, or your Instagram feed"
+      es: "Tu Instagram, un álbum de Google Fotos, tu sitio…"
+      en: "Your Instagram, a Google Photos album, your website…"
 
   # --- Fotos ---
+  #
+  # Las tres preguntas dicen la FORMA y los LIMITES porque el recorte y el
+  # descarte son SILENCIOSOS (medido el 2026-07-26, no supuesto):
+  #   - el logo se pinta en un circulo de 46 px con object-fit:cover
+  #     (templates/base.html, `.monogram`), asi que un logotipo alargado
+  #     pierde los lados;
+  #   - la foto principal y las de la galeria van todas en `.figure img`, con
+  #     aspect-ratio 4/3 y cover: una foto vertical se recorta arriba y abajo;
+  #   - build_client_from_intake.download_image SOLO conserva jpeg/png/webp de
+  #     menos de 8 MB y, si no, la pagina sale con el marcador de posicion sin
+  #     avisarle a nadie. Un cliente que sube un HEIC de su iPhone caia justo
+  #     ahi.
   - id: logo_url
     type: file
-    title: {es: "Sube tu logo", en: "Upload your logo"}
+    name: logo_url
+    title:
+      es: "Sube tu logo — cuadrado (se recorta en círculo). JPG, PNG o WebP, máx 8 MB"
+      en: "Upload your logo — square (it gets cropped into a circle). JPG, PNG or WebP, max 8 MB"
 
   - id: image_url
     type: file
-    title: {es: "Sube una foto principal", en: "Upload a main photo"}
+    name: image_url
+    title:
+      es: "Sube una foto principal — horizontal (se recorta a 4:3). JPG, PNG o WebP, máx 8 MB"
+      en: "Upload a main photo — landscape (cropped to 4:3). JPG, PNG or WebP, max 8 MB"
 
   - id: gallery_image_urls
     type: file
+    name: gallery_image_urls
     multiple: true
     max_files: 5
-    title: {es: "Más fotos", en: "More photos"}
+    title:
+      es: "Más fotos (hasta 5) — horizontales (se recortan a 4:3). JPG, PNG o WebP, máx 8 MB cada una"
+      en: "More photos (up to 5) — landscape (cropped to 4:3). JPG, PNG or WebP, max 8 MB each"
 
   # pet_notes_text maps via the Worker's fallback-by-token rule (contains
   # "pet"/"mascota" anywhere in the normalized title), not an exact alias —
@@ -198,6 +272,7 @@ questions:
   # the primary alias verbatim; the token rule is intentionally forgiving.
   - id: pet_notes_text
     type: textarea
+    name: pet_notes_text
     title:
       es: "¿Algo que debamos saber antes de traer a tu mascota?"
       en: "Anything pet parents should know before their visit?"
@@ -208,6 +283,7 @@ questions:
   # --- Legal (no mapea a proposito — confirmacion interna, no dato del cliente) ---
   - id: photo_rights
     type: checkboxes
+    name: photo_rights_confirmed
     required: true
     title:
       es: "Confirmo que las fotos que subo son mías o tengo derecho de usarlas"
