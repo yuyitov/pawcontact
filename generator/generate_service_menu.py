@@ -741,6 +741,22 @@ def build_marquee(payload: dict) -> str:
     )
 
 
+# CSS del mini-lookbook. Vive aqui y no en base.html porque se emite SOLO si la
+# pagina de verdad lleva lookbook (gate HMU 2026-07-25): estas 4 lineas eran CSS
+# muerto en toda pagina de HMU/PawContact —ninguna vertical usa `lookbook_urls`—
+# y eran la unica divergencia entre el motor y el repo standalone de HMU. El
+# token va PEGADO al final de la linea anterior en la plantilla (no en una linea
+# propia) para que, cuando esta vacio, no deje ni un salto de linea de sobra:
+# esa es la diferencia entre un diff de 6 lineas y un diff de cero.
+LOOKBOOK_CSS = (
+    "\n\n/* ---------- mini-lookbook (bloque opcional, Fase 3.2) ---------- */"
+    "\n.lookbook{padding-top:0}"
+    "\n.lookbook__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px}"
+    "\n.lookbook__img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:18px;"
+    "border:1px solid var(--hair)}"
+)
+
+
 def build_lookbook(payload: dict, s: dict) -> str:
     """Optional mini-lookbook: 1-4 extra photos, gated by the `lookbook`
     conditional block (Fase 3.2, ported from ModaLink). Purely data-driven —
@@ -1181,6 +1197,8 @@ def render_view(
         raise ValidationError(f"No existe el estilo para brand_style={brand!r}: {style_path}")
     template = template_path.read_text(encoding="utf-8")
     style_css = style_path.read_text(encoding="utf-8")
+    # Se calcula una sola vez: decide el bloque Y su CSS (ver LOOKBOOK_CSS).
+    lookbook_html = build_lookbook(view, s)
 
     tokens = {
         "{{LANG}}": lang,
@@ -1196,7 +1214,9 @@ def render_view(
         "{{HERO_TITLE_BLOCK}}": build_hero_title(view),
         "{{CTA_ROW_BLOCK}}": build_cta_row(view, s),
         "{{HERO_IMAGE_BLOCK}}": build_hero_image(view, s),
-        "{{LOOKBOOK_BLOCK}}": build_lookbook(view, s),
+        # Ver LOOKBOOK_CSS: bloque y CSS se emiten juntos o no se emite ninguno.
+        "{{LOOKBOOK_BLOCK}}": f"\n  {lookbook_html}" if lookbook_html else "",
+        "{{LOOKBOOK_CSS}}": LOOKBOOK_CSS if lookbook_html else "",
         "{{MARQUEE_BLOCK}}": build_marquee(view),
         "{{SERVICES_BLOCK}}": build_services(view, s),
         "{{FEATURED_BLOCK}}": build_featured(view, s),
