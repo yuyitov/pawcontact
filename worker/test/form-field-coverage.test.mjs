@@ -56,9 +56,22 @@ const SPEC = join(AQUI, '..', '..', 'tally_form.yaml')
 // ─────────────────────────────────────────────────────────────────────────────
 const NO_VIAJAN = new Map([
   ['photo_rights_confirmed',
-   'consentimiento legal (derechos de imagen de las fotos que sube el cliente): es un SÍ ' +
-   'obligatorio, no contenido de la página. Queda en el registro de KV como prueba de ' +
-   'aceptación — worker.js guarda `answers` completo. Publicarlo no significaría nada.'],
+   'consentimiento legal (derechos de imagen de las fotos que sube el cliente). ' +
+   'MEDIDO 2026-07-27 (pawcontact/6, KV remoto): los 3 submissions vivos SÍ traen la ' +
+   'respuesta en el blob crudo ("Sí"/"Yes"; el del 07-18 bajo la clave por TÍTULO, ' +
+   'anterior a los names estables), pero el blob expira a los 90 días (expirationTtl ' +
+   '7776000, worker.js) y las páginas con las fotos son PERMANENTES: la única prueba de ' +
+   'un consentimiento no puede expirar antes que el uso que ampara (prescripciones de ' +
+   'derechos de autor/imagen se miden en años, no en días). ' +
+   'DICTAMEN 2026-07-27: el blob NO basta — el campo debe declararse en el mapa para ' +
+   'quedar en el client.json permanente, como ya lo hace ModaLink (OPTIONAL_INTAKE_FIELDS ' +
+   'del motor ya lo extrae; solo falta la línea en verticals/pawcontact/tally-field-aliases.json ' +
+   '+ re-export engine-only + deploy). FICHADO AL MOTOR en el tablero, área linkFactory ' +
+   '(ficha «photo_rights_confirmed debe viajar al client.json», 2026-07-27) — no se toca ' +
+   'desde este repo. Evidencia de los 3 existentes preservada ANTES de su expiración en ' +
+   '..\\..\\..\\consentimientos-kv\\CONSENTIMIENTOS_2026-07-27.json (fuera de git: el repo es ' +
+   'público). Cuando el motor lo declare, esta misma prueba avisa sola: ' +
+   '"está en NO_VIAJAN pero SÍ llega — quita la excepción".'],
 ])
 
 // ─────────────────────────────────────────────────────────────────────────────
