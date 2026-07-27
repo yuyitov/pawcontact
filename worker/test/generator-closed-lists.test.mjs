@@ -56,24 +56,17 @@ const VALIDOS = {
 // Opciones vivas que HOY no producen un valor válido, cada una FICHADA con su
 // razón y dónde vive el arreglo. Clave: `<lista>::<texto exacto de la opción>`.
 // Una opción rota que no esté aquí es una falla.
-const ROTAS = new Map([
-  ['primary_cta::Booking link',
-   'HALLAZGO 2026-07-26 (Fase 3.5) · FICHADO AL MOTOR. El MISMO hueco que ya la tumba en el ' +
-   'worker (ver OPCIONES_ROTAS en form-field-coverage.test.mjs): "booking_link" no está en la ' +
-   'tabla de alias, que tiene "booking" y "external_booking_link". Aparece dos veces porque la ' +
-   'tabla está copiada en worker.js y en build_client_from_intake.py — arreglar una sola deja ' +
-   'la opción rota igual.'],
-  ['primary_cta::Reservas / agenda',
-   'HALLAZGO 2026-07-26 (Fase 3.5) · FICHADO AL MOTOR. El lado ES del mismo hueco: ' +
-   '"reservas_agenda" no está en la tabla (sí "reservas" y "reservar" por separado).'],
-  ['primary_cta::Instagram',
-   'HALLAZGO 2026-07-26 (Fase 3.5) · FICHADO AL MOTOR. Hay DOS copias de la tabla de alias ' +
-   'del CTA y no dicen lo mismo: la de generate_service_menu.py tiene "instagram", la de ' +
-   'build_client_from_intake.py NO (salta de tiktok a email). Y la que decide es la de ' +
-   'build_client, porque escribe el valor ya normalizado en el JSON del cliente — cuando ahí ' +
-   'sale None, generate_service_menu nunca ve el texto original. Efecto: el negocio elige ' +
-   'Instagram como botón principal y recibe WhatsApp.'],
-])
+//
+// VACÍO desde el 2026-07-27. Tenía las 3 opciones del botón principal que se
+// caían en silencio ("Booking link", "Reservas / agenda" e "Instagram"), y las
+// tres tenían la misma causa: la tabla de alias del CTA estaba COPIADA en
+// worker.js, en build_client_from_intake.py y en generate_service_menu.py, y
+// las copias no decían lo mismo. Arreglar una sola dejaba la opción rota igual.
+// El motor la volvió dato (`worker/primary-cta-aliases.json`, linkFactory/8 y
+// /9) y las tres consumen esa. El arreglo llegó a este repo con el re-export de
+// linkFactory/12 — hasta ese día seguía vivo aquí aunque en el motor estuviera
+// cerrado, que es justo la deuda que esa ficha medía.
+const ROTAS = new Map([])
 
 // Dos opciones VIVAS que a propósito caen en la MISMA categoría, con su razón.
 // Clave: `<lista>::<categoría resultante>`. Sin esta lista, un normalizador que

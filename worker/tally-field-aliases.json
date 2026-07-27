@@ -54,5 +54,9 @@
   "sale_button_kind": ["how_should_customers_place_orders", "como_quieres_que_te_hagan_los_pedidos"],
   "sale_button_value": ["number_for_that_button", "numero_para_ese_boton"],
   "products_text": ["your_products_one_per_line", "tus_productos_uno_por_linea"],
-  "product_image_urls": ["photos_of_your_products", "fotos_de_tus_productos"]
+  "product_image_urls": ["photos_of_your_products", "fotos_de_tus_productos"],
+
+  "_comment_pawcontact": "Este archivo es el MAPEO GENERICO DEL MOTOR (engine/worker/tally-field-aliases.json) COPIADO TAL CUAL, mas el bloque de abajo. Existe porque export_vertical.py elige uno u otro, nunca los fusiona: en cuanto una vertical necesita UNA entrada propia se lleva el archivo entero. Por eso todo lo de arriba tiene que seguir byte a byte igual al generico — hay un test que lo exige (tests/python/test_aliases_pawcontact.py): si el motor aprende un campo nuevo y este archivo se queda atras, PawContact lo pierde en silencio.",
+  "_comment_photo_rights": "Dictamen pawcontact/6 (2026-07-27): el consentimiento de derechos de imagen vivia SOLO en el blob crudo del intake, que expira a los 90 dias (expirationTtl 7776000), mientras que las paginas con esas fotos son PERMANENTES. La unica prueba de un consentimiento no puede expirar antes que el uso que ampara, asi que el campo se declara aqui para que el worker lo extraiga y viaje al client.json. La lista va VACIA a proposito: el name estable que manda el formulario vivo ES `photo_rights_confirmed`, y la derivacion de worker.js agrega el nombre canonico sola (FIELD_ALIASES, linea ~104). ModaLink lo declara por TITULO porque su formulario es anterior a los names estables.",
+  "photo_rights_confirmed": []
 }

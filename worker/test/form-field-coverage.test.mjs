@@ -54,25 +54,19 @@ const SPEC = join(AQUI, '..', '..', 'tally_form.yaml')
 // formularios, al revés que en HMU (formulario a mano, sin `name`, un título
 // por idioma).
 // ─────────────────────────────────────────────────────────────────────────────
-const NO_VIAJAN = new Map([
-  ['photo_rights_confirmed',
-   'consentimiento legal (derechos de imagen de las fotos que sube el cliente). ' +
-   'MEDIDO 2026-07-27 (pawcontact/6, KV remoto): los 3 submissions vivos SÍ traen la ' +
-   'respuesta en el blob crudo ("Sí"/"Yes"; el del 07-18 bajo la clave por TÍTULO, ' +
-   'anterior a los names estables), pero el blob expira a los 90 días (expirationTtl ' +
-   '7776000, worker.js) y las páginas con las fotos son PERMANENTES: la única prueba de ' +
-   'un consentimiento no puede expirar antes que el uso que ampara (prescripciones de ' +
-   'derechos de autor/imagen se miden en años, no en días). ' +
-   'DICTAMEN 2026-07-27: el blob NO basta — el campo debe declararse en el mapa para ' +
-   'quedar en el client.json permanente, como ya lo hace ModaLink (OPTIONAL_INTAKE_FIELDS ' +
-   'del motor ya lo extrae; solo falta la línea en verticals/pawcontact/tally-field-aliases.json ' +
-   '+ re-export engine-only + deploy). FICHADO AL MOTOR en el tablero, área linkFactory ' +
-   '(ficha «photo_rights_confirmed debe viajar al client.json», 2026-07-27) — no se toca ' +
-   'desde este repo. Evidencia de los 3 existentes preservada ANTES de su expiración en ' +
-   '..\\..\\..\\consentimientos-kv\\CONSENTIMIENTOS_2026-07-27.json (fuera de git: el repo es ' +
-   'público). Cuando el motor lo declare, esta misma prueba avisa sola: ' +
-   '"está en NO_VIAJAN pero SÍ llega — quita la excepción".'],
-])
+//
+// ESTÁ VACÍO, Y ES EL RESULTADO: hasta el 2026-07-27 tenía UNA entrada,
+// `photo_rights_confirmed` — el consentimiento de derechos de imagen, que se
+// contestaba y se quedaba SOLO en el blob crudo del intake (expirationTtl de 90
+// días) mientras la página con esas fotos es permanente. La excepción decía en
+// su propio texto que cuando el motor declarara el campo, esta prueba avisaría
+// sola con «está en NO_VIAJAN pero SÍ llega — quita la excepción». Es
+// exactamente lo que pasó al llegar el re-export de linkFactory/12+16: el
+// candado se puso rojo sin que nadie fuera a buscarlo, y quitar la entrada es
+// lo que cierra el círculo. Queda escrito porque el mecanismo vale más que el
+// caso: una excepción de esta lista no es para siempre, es una deuda con fecha.
+// ─────────────────────────────────────────────────────────────────────────────
+const NO_VIAJAN = new Map([])
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Listas cerradas cuya respuesta el worker TRANSFORMA: el texto de la opción no
@@ -95,20 +89,18 @@ const TRANSFORMADAS = new Map([
 // Vacío es el estado sano: significa que toda opción viva produce un valor.
 //
 // Clave: `<name de la pregunta>::<texto exacto de la opción viva>`.
-const OPCIONES_ROTAS = new Map([
-  ['primary_cta::Booking link',
-   'HALLAZGO 2026-07-26 (Fase 3.5) · FICHADO AL MOTOR, no se arregla en este repo. ' +
-   'normalizeKey("Booking link") = "booking_link" y la tabla de normalizePrimaryCta ' +
-   '(worker.js, motor) tiene "booking" y "external_booking_link" pero NO "booking_link": ' +
-   'primary_cta sale vacío. Efecto probado: el generador cae a PRIMARY_CTA_CHOICES y pinta ' +
-   'WhatsApp. Una veterinaria que eligió su liga de reservas recibe la página con el botón ' +
-   'de WhatsApp destacado, y nada lo avisa.'],
-  ['primary_cta::Reservas / agenda',
-   'HALLAZGO 2026-07-26 (Fase 3.5) · FICHADO AL MOTOR, no se arregla en este repo. ' +
-   'Es el mismo hueco que "Booking link" del lado ES: "reservas_agenda" no está en la tabla ' +
-   '(sí "reservas" y "reservar", pero el texto vivo de la opción lleva las dos palabras). ' +
-   'Mismo efecto: el botón elegido se pierde y sale WhatsApp.'],
-])
+//
+// VACÍO desde el 2026-07-27, y así es como se arregló: tenía las 2 opciones del
+// botón principal que se caían en silencio ("Booking link" y "Reservas /
+// agenda"), fichadas al MOTOR con la instrucción de no arreglarlas en este
+// repo. Se arreglaron allá (linkFactory/8 y /9: la tabla del CTA dejó de estar
+// copiada tres veces y pasó a ser dato, `worker/primary-cta-aliases.json`), y
+// el arreglo tardó en llegar aquí porque la copia del motor de este repo estaba
+// a 19 archivos de distancia. Lo trajo el re-export de linkFactory/12. Mientras
+// tanto, una veterinaria que elegía su liga de reservas recibía la página con
+// el botón de WhatsApp destacado y nada lo avisaba.
+// ─────────────────────────────────────────────────────────────────────────────
+const OPCIONES_ROTAS = new Map([])
 
 // Dos opciones VIVAS de la misma lista cerrada que a propósito producen el mismo
 // valor. Clave: `<name de la pregunta>::<valor resultante>`. Vacío es el estado
