@@ -9,7 +9,7 @@
  * contra lo que el worker lee.
  *
  * Esta prueba lo compara. Para CADA pregunta viva de los DOS formularios
- * (EN zxo55M · ES 0QyRRB) arma un webhook de Tally con un valor centinela y
+ * (EN BzqXA5 · ES A7NdA0) arma un webhook de Tally con un valor centinela y
  * afirma que el centinela sale del otro lado, en algún campo del payload público
  * que se despacha al generador. Una pregunta que no llega y no está en la lista
  * NO_VIAJAN (cada entrada con su razón escrita) es un campo perdido.
@@ -80,7 +80,7 @@ const NO_VIAJAN = new Map([])
 // habría cazado.
 // ─────────────────────────────────────────────────────────────────────────────
 const TRANSFORMADAS = new Map([
-  ['pick_your_style', 'estilo'],
+  ['brand_style', 'estilo'],
   ['primary_cta', 'cta'],
 ])
 
@@ -145,6 +145,8 @@ const SIN_PREGUNTA = new Map([
   ['class_schedule_text', 'campo del MOTOR (talleres/clases): PawContact no lo pregunta'],
   ['tour_details_text', 'campo del MOTOR (tours): PawContact no lo pregunta'],
   ['service_categories_text', 'campo del MOTOR: PawContact no lo pregunta; el generador deriva las categorías de services_text'],
+  ['portfolio_link', 'campo legado del MOTOR: Vero retiró esta pregunta; la galería y las redes muestran el trabajo sin sumar otro enlace'],
+  ['price_display', 'campo legado del MOTOR: Vero retiró esta política; los precios escritos en services_text se muestran tal como se capturan'],
 ])
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -157,35 +159,7 @@ const SIN_PREGUNTA = new Map([
 //
 // Clave = el `name` estable de la pregunta.
 // ─────────────────────────────────────────────────────────────────────────────
-const DESFASES_CONOCIDOS = new Map([
-  ['portfolio_link',
-   'DECISIÓN DE VERO 2026-07-26 · ACCIÓN DE CONSOLA PENDIENTE. El spec reescribió el título ' +
-   'para que diga QUÉ poner ("Enlace a fotos de tu trabajo (opcional)" / "Link to photos of ' +
-   'your work (optional)"); el formulario vivo sigue diciendo "Enlace de portafolio" / ' +
-   '"Portfolio link", que fue justo lo que Vero reportó que no dice nada. Y si la decisión ' +
-   'final es QUITAR la pregunta, también se quita en Tally. Ninguna de las dos se hace desde ' +
-   'este repo.'],
-  ['instagram',
-   'CORRECCIÓN FASE 2 #1 · ACCIÓN DE CONSOLA PENDIENTE. El spec la bajó a campo de TEXTO para ' +
-   'aceptar "@puppy_patch_pv"; el vivo sigue siendo INPUT_LINK, que exige una URL y rechaza ' +
-   'el usuario — que es lo que la gente comparte. El generador ya acepta el handle.'],
-  ['facebook',
-   'CORRECCIÓN FASE 2 #1 · ACCIÓN DE CONSOLA PENDIENTE. Igual que instagram: el spec dice ' +
-   'texto, el vivo sigue siendo INPUT_LINK.'],
-  ['tiktok',
-   'CORRECCIÓN FASE 2 #1 · ACCIÓN DE CONSOLA PENDIENTE. Igual que instagram: el spec dice ' +
-   'texto, el vivo sigue siendo INPUT_LINK.'],
-  ['logo_url',
-   'CORRECCIÓN FASE 2 #4 · ACCIÓN DE CONSOLA PENDIENTE. El spec dice la forma y los límites ' +
-   '("cuadrado (se recorta en círculo). JPG, PNG o WebP, máx 8 MB") porque el recorte y el ' +
-   'descarte son SILENCIOSOS; el vivo sigue diciendo solo "Sube tu logo".'],
-  ['image_url',
-   'CORRECCIÓN FASE 2 #4 · ACCIÓN DE CONSOLA PENDIENTE. El spec dice "horizontal (se recorta ' +
-   'a 4:3)" y los límites de archivo; el vivo sigue diciendo solo "Sube una foto principal".'],
-  ['gallery_image_urls',
-   'CORRECCIÓN FASE 2 #4 · ACCIÓN DE CONSOLA PENDIENTE. El spec dice "hasta 5 — horizontales ' +
-   '(se recortan a 4:3)" y los límites; el vivo sigue diciendo solo "Más fotos".'],
-])
+const DESFASES_CONOCIDOS = new Map([])
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -456,6 +430,7 @@ const TIPO_SPEC_A_TALLY = {
   email: 'INPUT_EMAIL',
   link: 'INPUT_LINK',
   dropdown: 'DROPDOWN',
+  multiple_choice: 'MULTIPLE_CHOICE',
   file: 'FILE_UPLOAD',
   checkboxes: 'CHECKBOXES',
 }

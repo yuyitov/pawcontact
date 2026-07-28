@@ -3,7 +3,7 @@
 Lee {"opciones": {"<lista>": ["texto de la opción", ...]}} por stdin y devuelve
 por stdout lo que los normalizadores REALES del generador hacen con cada una.
 
-Existe porque tres de las listas cerradas de PawContact no las decide el worker
+Existe porque dos de las listas cerradas de PawContact no las decide el worker
 (JavaScript) sino el generador (Python), y una prueba que solo mire el worker
 las da por buenas. Se importan las funciones del módulo que se despliega, no
 copias: si la tabla de alias cambia, esto cambia con ella.
@@ -16,7 +16,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "generator"))
 
 from build_client_from_intake import (  # noqa: E402
     normalize_business_type,
-    normalize_price_policy,
     normalize_primary_cta,
 )
 
@@ -26,7 +25,6 @@ from build_client_from_intake import (  # noqa: E402
 # mide la de build_client, que es la que decide.
 NORMALIZADORES = {
     "primary_cta": normalize_primary_cta,
-    "price_display": normalize_price_policy,
     "business_type": normalize_business_type,
 }
 

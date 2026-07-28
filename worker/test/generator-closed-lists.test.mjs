@@ -3,12 +3,11 @@
  * no puede ver.
  *
  * `form-field-coverage.test.mjs` prueba que cada opción viva produzca un valor
- * en el PAYLOAD del worker. Pero tres de las listas cerradas de PawContact
+ * en el PAYLOAD del worker. Pero dos de las listas cerradas de PawContact
  * viajan al payload como texto tal cual y las decide después el generador, en
  * Python:
  *
  *   primary_cta     -> build_client_from_intake.normalize_primary_cta
- *   price_display   -> build_client_from_intake.normalize_price_policy
  *   business_type   -> build_client_from_intake.normalize_business_type
  *
  * Una prueba que solo mire el worker las da por buenas y se equivoca: la opción
@@ -40,16 +39,8 @@ const PUENTE = join(AQUI, 'normalizadores_del_generador.py')
 // `website` están porque el formulario las ofrece; `instagram` también, y por
 // eso se nota que hoy no llega.
 //
-// price_display: OJO con lo que esta prueba NO dice. Las 3 opciones dan 3
-// políticas distintas —por eso no colapsan aquí— pero río abajo el generador
-// solo distingue "hide": `parse_services` guarda el precio si la política no es
-// "hide", así que «mostrar todos» y «mixto» producen la MISMA página. Eso ya
-// está medido y registrado como hallazgo de la Fase 2 en el Centro de Control;
-// se anota aquí para que "3 valores válidos" no se lea como "3 páginas
-// distintas".
 const VALIDOS = {
   primary_cta: ['whatsapp', 'phone', 'booking', 'website', 'instagram', 'facebook', 'tiktok', 'email', 'other', 'maps'],
-  price_display: ['show', 'hide', 'mixed'],
   business_type: ['food', 'fitness', 'tours', 'pets', 'creative', 'wellness', 'beauty', 'professional', 'retail', 'general'],
 }
 
@@ -78,7 +69,7 @@ const COLAPSOS = new Map([
   ['business_type::pets',
    'A PROPÓSITO y documentado en tally_form.yaml: estética canina y veterinaria caen las dos ' +
    'en "pets". La categoría solo gatea bloques cosméticos, y para PawContact "pets" no gatea ' +
-   'nada por sí misma (su vertical.yaml abre portfolio a "all"). Distinguirlas no cambiaría ' +
+   'nada por sí misma; portfolio está apagado para toda la vertical. Distinguirlas no cambiaría ' +
    'ninguna página.'],
 ])
 
@@ -114,7 +105,7 @@ for (const form of snapshot.forms) {
     if (VALIDOS[q.title] && q.options?.length) opciones[q.title] = q.options
   }
 
-  check(`[${form.lang}] el formulario vivo trae las 3 listas cerradas del generador`,
+  check(`[${form.lang}] el formulario vivo trae las 2 listas cerradas del generador`,
     Object.keys(opciones).length === Object.keys(VALIDOS).length,
     `encontradas: ${Object.keys(opciones).join(', ') || '—'}`)
 

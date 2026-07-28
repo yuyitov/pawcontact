@@ -9,8 +9,8 @@ Necesitan `node` y `python` (el que ya pide el generador).
 
 | Archivo | Qué afirma |
 |---|---|
-| `form-field-coverage.test.mjs` | Cada pregunta de los **formularios vivos** de Tally (EN `zxo55M` · ES `0QyRRB`) llega a algún campo del payload público, o tiene su razón escrita. Además: las listas cerradas que decide el worker (estilo y botón principal), la derivación del idioma, y el **desfase entre `tally_form.yaml` y el formulario vivo**. |
-| `generator-closed-lists.test.mjs` | Las tres listas cerradas que NO decide el worker sino el generador en Python (`primary_cta`, `price_display`, `business_type`): cada opción viva produce una categoría válida, y dos opciones distintas no colapsan en la misma. |
+| `form-field-coverage.test.mjs` | Cada pregunta de los **formularios vivos** de Tally (EN `BzqXA5` · ES `A7NdA0`) llega a algún campo del payload público, o tiene su razón escrita. Además: las listas cerradas que decide el worker (estilo y botón principal), la derivación del idioma, y el **desfase entre `tally_form.yaml` y el formulario vivo**. |
+| `generator-closed-lists.test.mjs` | Las dos listas cerradas que NO decide el worker sino el generador en Python (`primary_cta`, `business_type`): cada opción viva produce una categoría válida, y dos opciones distintas no colapsan en la misma. |
 
 ## Por qué existen
 
@@ -107,9 +107,9 @@ código real, se corrió la suite y se revirtió:
 | M2 | Tally renombra una pregunta viva (`services_text` → `services_list`) | Sí: pregunta perdida + campo huérfano + desfase nuevo |
 | M3 | Alguien agrega al formulario un estilo que no está en `VALID_BRAND_STYLES` | Sí: `midnight-ink → warm-sand (FALLBACK)` |
 | M4 | El spec cambia un título y nadie lo aplica en Tally | Sí: desfase nuevo, con los dos textos |
-| M5 | Se rompe la derivación del idioma (el form ES apunta a otro id) | Sí: `0QyRRB (es) → default_language="en"` |
+| M5 | Se rompe la derivación del idioma (el form ES apunta a otro id) | Sí: el formulario ES produce `default_language="en"` |
 | M6 | El generador pierde el alias `sitio_web` del botón | Sí: «Sitio web» → (nada) |
-| M7 | El generador deja de entender «No mostrar precios» | **Al principio NO** — el valor caía en `show`, que es válido. Se agregó la detección de colapsos y ahora sí |
+| M7 | El generador deja de entender una opción de una lista cerrada | **Al principio NO** — un valor podía seguir siendo válido aunque fuera el incorrecto. Se agregó la detección de colapsos y ahora sí |
 | M8 | Vuelve el bug de `sunny-paws` (el guion normal como separador) | Sí: las 4 opciones a `warm-sand (FALLBACK)` |
 | M9 | Dos estilos vivos distintos dan el mismo estilo válido | Sí: «TODAS a "sunny-paws"» |
 
