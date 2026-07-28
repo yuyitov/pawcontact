@@ -1,6 +1,6 @@
 {
   "_comment": "Mapa campo-público -> alias de título (normalizados con normalizeKey: sin acentos, minúsculas, no-alfanumérico -> _). buildPublicPayload en worker.js lo importa como única fuente de verdad; create_tally_forms.py --check-mapping valida contra él los títulos del tally_form.yaml de la vertical para detectar drift ANTES del deploy (y no como intake perdido). Estos son los alias de la vertical de referencia (HMU): son genéricos por idioma. export_vertical.py copia este archivo a worker/ en cada export, así cada vertical standalone tiene su propia copia editable.",
-  "pick_your_style": ["pick_your_style", "elige_tu_estilo"],
+  "pick_your_style": ["pick_your_style", "brand_style", "elige_tu_estilo"],
   "default_language": ["what_language_should_show_first", "en_que_idioma_debe_aparecer_primero"],
   "_comment_default_language": "Estos 2 son genéricos (sin marca). worker.js (buildPublicPayload) SUMA en tiempo de ejecución 2 alias más derivados de env.BRAND_NAME (product-config.mjs::languageQuestionAliases) — antes ese par vivía hardcodeado aquí como literal 'hmu_link'. create_tally_forms.py --check-mapping los replica desde vertical.yaml::brand_name para no perder cobertura del chequeo.",
   "business_name": ["business_name", "nombre_del_negocio"],

@@ -83,7 +83,9 @@ jobs:
 
       - name: Verify no unreplaced {{...}} tokens in generated HTML
         run: |
-          if grep -rl "{{" public/demos/ ; then
+          # -I: sin binarios — los bytes de un .webp pueden contener "{{"
+          # (cazado en el primer deploy del catálogo, 2026-07-27).
+          if grep -rlI "{{" public/demos/ ; then
             echo "Hay tokens {{...}} sin reemplazar en la salida."
             exit 1
           fi
