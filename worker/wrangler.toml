@@ -93,13 +93,10 @@ ALERT_EMAIL          = "veronica.perezarroyo@gmail.com"
 # productos que ya conoces para NO recibir una alerta por cada una. Solo se
 # alerta de un `other_product` cuyo plink no esté ni en STRIPE_PAYMENT_LINK_ID ni
 # aquí — el síntoma de un link propio desfasado. Empieza vacío.
-# The Catalog Link (creados a mano el 2026-07-25, pendiente linkFactory/5):
-#   plink_1TxIjs... $99 USD  venta        plink_1TxIly... $1,699 MXN venta
-#   plink_1TxInc... $6 USD   cambio extra plink_1TxIpV... $59 MXN    cambio extra
-#   plink_1TxJ1u... $1 USD   PRUEBA (desactivado en Stripe; el id sigue siendo suyo)
-# Sin esta linea, cada venta del catalogo dispara "pago con payment_link NO
-# reconocido" en los 5 workers hermanos.
-KNOWN_OTHER_PAYMENT_LINKS = "plink_1TxIjsG4Nw60erBPnXsLGjyr,plink_1TxIlyG4Nw60erBPYUjCe3IN,plink_1TxIncG4Nw60erBPIoDszOL8,plink_1TxIpVG4Nw60erBPzXgvTGxX,plink_1TxJ1uG4Nw60erBPYPesVk9F"
+# Inventario cross-product completo, medido el 2026-07-28. Incluye todos los
+# IDs obligatorios de los otros cinco Workers y los dos respaldos manuales de
+# correcciones del Catalogo. `auditoria/config-externa` detecta cualquier drift.
+KNOWN_OTHER_PAYMENT_LINKS = "plink_1TpW1pG4Nw60erBPpTk296oO,plink_1Tr7lEG4Nw60erBPZ51f4cOC,plink_1TuOQXG4Nw60erBPUus5heVm,plink_1TuOvXG4Nw60erBPQPwonRRP,plink_1TrBqKG4Nw60erBPqBWlwnCs,plink_1TrBqKG4Nw60erBPKa1ZXrKV,plink_1TrBqLG4Nw60erBPiRGaPNIv,plink_1TuOEyG4Nw60erBPX4UjGJxS,plink_1TuOP5G4Nw60erBPjC3zWs69,plink_1Tq0sdG4Nw60erBPIGIWEKxk,plink_1Tq0slG4Nw60erBPoJXiDTMT,plink_1Tq2CUG4Nw60erBPqHG9gtdL,plink_1TuORfG4Nw60erBPNdw1QzYj,plink_1TuOTgG4Nw60erBPWSjHE7ZZ,plink_1TUJUsG4Nw60erBPDOUoFGk2,plink_1TuOXjG4Nw60erBPwDgZIhEx,plink_1TuOu8G4Nw60erBP7Z9ognUk,plink_1TxIjsG4Nw60erBPnXsLGjyr,plink_1TxIlyG4Nw60erBPYUjCe3IN,plink_1TxIncG4Nw60erBPIoDszOL8,plink_1TxIpVG4Nw60erBPzXgvTGxX,plink_1TxJ1uG4Nw60erBPYPesVk9F"
 PUBLIC_BOOK_BASE_URL = "https://www.pawcontact.com"
 # URL pública de este worker — la usan los links de "comprar corrección
 # adicional" (/buy-correction) que van en correos y en la página /correct/.
