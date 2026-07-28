@@ -68,7 +68,7 @@ BRAND_TAGLINE          = "Service menus for pet businesses"
 # desde ahí, así el YAML sigue siendo la fuente de verdad. Vacío = cae a los 12
 # de HMU. Un estilo elegido fuera de esta lista cae al fallback (warm-sand si
 # está, si no el primero) marcado style_unmapped.
-VALID_BRAND_STYLES    = "sunny-paws,aqua-clean,sage-calm,warm-sand"
+VALID_BRAND_STYLES    = "sunny-paws,aqua-clean,sage-calm,warm-sand,black-gold,soft-blush,charcoal-clean,electric-slate,terracotta-warm,midnight-ink,clarity-editorial,horizon-teal"
 # ID(s) del Payment Link de esta vertical (plink_...). Acepta varios separados
 # por coma — p.ej. el link USD y el MXN — para que todas las compras de esta
 # vertical se procesen, ignorando ventas de otros productos de la cuenta.
@@ -76,8 +76,8 @@ VALID_BRAND_STYLES    = "sunny-paws,aqua-clean,sage-calm,warm-sand"
 STRIPE_PAYMENT_LINK_ID = "plink_1TtvhdG4Nw60erBP9P6jrZM6,plink_1TtvjfG4Nw60erBPAjvz95od,plink_1TuPyHG4Nw60erBPSTXvS2cF"
 GITHUB_REPO          = "yuyitov/pawcontact"
 GITHUB_ACTIONS_EVENT = "new-pawcontact-service-menu"
-TALLY_FORM_URL_EN    = "https://tally.so/r/zxo55M?order_id="
-TALLY_FORM_URL_ES    = "https://tally.so/r/0QyRRB?order_id="
+TALLY_FORM_URL_EN    = "https://tally.so/r/BzqXA5?order_id="
+TALLY_FORM_URL_ES    = "https://tally.so/r/A7NdA0?order_id="
 FROM_EMAIL           = "PawContact <hello@pawcontact.com>"
 # Buzón monitoreado al que llegan las respuestas de los clientes (p.ej. la
 # corrección gratuita). hello@pawcontact.com SÍ recibe desde el 2026-07-20

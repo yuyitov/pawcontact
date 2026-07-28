@@ -15,6 +15,14 @@ styles:
     - aqua-clean
     - sage-calm
     - warm-sand
+    - black-gold
+    - soft-blush
+    - charcoal-clean
+    - electric-slate
+    - terracotta-warm
+    - midnight-ink
+    - clarity-editorial
+    - horizon-teal
 
 # Per-language UI string overrides layered on the engine base STRINGS
 # (engine/generator/strings_base.py). Empty by default. If you override ANY
@@ -42,18 +50,46 @@ strings_overrides:
 #     delivery_pickup:
 #       enabled_for: none
 #
-# portfolio -> "all": PawContact's business_type dropdown (tally_form.yaml)
-# classifies grooming AND vet clinics as "pets" (keyword-scored by
-# build_client_from_intake.py::normalize_business_type — verified, not
-# guessed), and "pets" isn't in the engine default's enabled_for
-# (creative/beauty/wellness/professional/fitness). Widened to "all" so a
-# groomer's before/after work or a vet's facility photos can still show —
-# every one of PawContact's 4 segments can plausibly want a portfolio link.
+# portfolio -> "none" (DECISION DE VERO 2026-07-26). El bloque no pinta
+# fotos: es UN LINK MAS en la fila de enlaces secundarios, donde ya compiten
+# Instagram, Facebook, TikTok, mapas y resenas. Y su propio placeholder pedia
+# "tu Instagram, un album de Google Fotos, tu sitio" — o sea, un enlace a lo
+# que YA se pregunta. Para un negocio chico sin web, su portafolio ES su
+# Instagram. Cada enlace de mas diluye a los que convierten (WhatsApp, llamar,
+# como llegar), y quien quiere ensenar su trabajo lo hace con la GALERIA de
+# fotos, que se ve sin salir de la pagina. Se apaga aqui, no se borra del
+# motor: el codigo sirve si nace una vertical donde un portafolio externo si
+# tenga sentido (un fotografo con Behance).
 # delivery_pickup stays on defaults: boutiques classify as "retail" cleanly,
 # already covered by food/retail.
 blocks:
   portfolio:
-    enabled_for: all
+    enabled_for: none
+
+# Como se LEE el intake de esta vertical (ver INTAKE_DEFAULTS en
+# vertical_config.py). El worker extrae estos campos como texto —solo porque el
+# tally-field-aliases.json de al lado los declara— y aqui se dice en que se
+# convierten. Una vertical que no abre esta seccion no gana ni una clave.
+intake:
+  fields:
+    # DICTAMEN pawcontact/6 (2026-07-27). El consentimiento de derechos de
+    # imagen se contesta en el intake y hasta hoy vivia SOLO en el blob crudo
+    # que guarda el worker, con expirationTtl de 90 dias — mientras que la
+    # pagina con esas fotos es PERMANENTE. La unica prueba de un consentimiento
+    # no puede expirar antes que el uso que ampara, asi que el campo tiene que
+    # quedar en el client.json, que si es permanente.
+    #
+    # Van las DOS declaraciones o no sirve ninguna: el alias de al lado hace que
+    # el WORKER lo extraiga al payload, y esta linea hace que
+    # build_client_from_intake lo ESCRIBA al client.json. Con solo la primera,
+    # el campo llega al payload y se tira ahi mismo.
+    #
+    # NO se declara `schema.require_true` (ModaLink si lo hace). Ahi la casilla
+    # es un gate: sin ella el generador se niega a publicar. Prenderlo aqui
+    # dejaria de generar las paginas de los clientes que YA compraron, porque
+    # sus client.json son anteriores al campo y no lo traen. Es una decision de
+    # producto de Vero, no del re-export; queda fichada.
+    photo_rights_confirmed: {kind: yes_no}
 
 # Datos legales de la vertical (Ola 1b). Los consumen las plantillas de
 # engine/store/legal/*.md (Terminos y Aviso de Privacidad, ES/EN) y el

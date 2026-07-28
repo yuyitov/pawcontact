@@ -20,6 +20,32 @@ form_title:
   es: "PawContact — Cuestionario de tu negocio"
   en: "PawContact — Your business questionnaire"
 
+# Modificación prellenada: 21 preguntas visibles toman su valor inicial de un
+# hidden field del mismo nombre. Son las 21 del cableado vivo anterior,
+# sustituyendo portfolio_link (pregunta retirada) por brand_style.
+prefill_fields:
+  - business_name
+  - brand_style
+  - short_description
+  - whatsapp
+  - phone
+  - public_email
+  - website
+  - booking_url
+  - instagram
+  - facebook
+  - tiktok
+  - services_text
+  - featured_text
+  - policies_text
+  - faq_text
+  - opening_hours_text
+  - address
+  - google_maps_url
+  - google_reviews_url
+  - delivery_pickup_links_text
+  - pet_notes_text
+
 # Cada pregunta declara `name:`: el field name ESTABLE con el que Tally guarda
 # esa respuesta. Es deliberadamente el MISMO en el formulario ES y en el EN, y
 # coincide con el campo del public_payload del worker (ver
@@ -37,15 +63,47 @@ questions:
     title: {es: "Nombre del negocio", en: "Business name"}
 
   - id: brand_style
-    type: dropdown
-    name: pick_your_style
+    type: multiple_choice
+    name: brand_style
     required: true
     title: {es: "Elige tu estilo", en: "Pick your style"}
     options:
-      - {es: "sunny-paws — alegre y jugueton (estilistas/grooming)", en: "sunny-paws — playful and bright (groomers)"}
-      - {es: "aqua-clean — limpio y fresco (veterinarias)", en: "aqua-clean — fresh and clean (vet clinics)"}
-      - {es: "sage-calm — natural y relajante (hoteles/guarderias)", en: "sage-calm — natural and calm (boarding/daycare)"}
-      - {es: "warm-sand — calido y cercano (boutiques)", en: "warm-sand — warm and artisanal (boutiques)"}
+      - es: "sunny-paws — alegre y jugueton (estilistas/grooming)"
+        en: "sunny-paws — playful and bright (groomers)"
+        image_url: "https://www.hmulink.com/assets/previews/sunny-paws.jpg"
+      - es: "aqua-clean — limpio y fresco (veterinarias)"
+        en: "aqua-clean — fresh and clean (vet clinics)"
+        image_url: "https://www.hmulink.com/assets/previews/aqua-clean.jpg"
+      - es: "sage-calm — natural y relajante (hoteles/guarderias)"
+        en: "sage-calm — natural and calm (boarding/daycare)"
+        image_url: "https://www.hmulink.com/assets/previews/sage-calm.jpg"
+      - es: "warm-sand — calido y cercano (boutiques)"
+        en: "warm-sand — warm and artisanal (boutiques)"
+        image_url: "https://www.hmulink.com/assets/previews/warm-sand.jpg"
+      - es: "black-gold — elegante y premium (boutiques)"
+        en: "black-gold — elegant and premium (boutiques)"
+        image_url: "https://www.hmulink.com/assets/previews/black-gold.jpg"
+      - es: "soft-blush — suave y cariñoso (spa/estética)"
+        en: "soft-blush — soft and caring (spa/grooming)"
+        image_url: "https://www.hmulink.com/assets/previews/soft-blush.jpg"
+      - es: "charcoal-clean — moderno y profesional (veterinarias/entrenamiento)"
+        en: "charcoal-clean — modern and professional (vet clinics/training)"
+        image_url: "https://www.hmulink.com/assets/previews/charcoal-clean.jpg"
+      - es: "electric-slate — audaz y dinámico (entrenamiento/guardería)"
+        en: "electric-slate — bold and dynamic (training/daycare)"
+        image_url: "https://www.hmulink.com/assets/previews/electric-slate.jpg"
+      - es: "terracotta-warm — artesanal y acogedor (boutiques/hospedaje)"
+        en: "terracotta-warm — artisanal and welcoming (boutiques/boarding)"
+        image_url: "https://www.hmulink.com/assets/previews/terracotta-warm.jpg"
+      - es: "midnight-ink — sobrio y distinguido (servicios premium)"
+        en: "midnight-ink — refined and distinguished (premium services)"
+        image_url: "https://www.hmulink.com/assets/previews/midnight-ink.jpg"
+      - es: "clarity-editorial — claro y ordenado (negocios con muchos servicios)"
+        en: "clarity-editorial — clear and organized (multi-service businesses)"
+        image_url: "https://www.hmulink.com/assets/previews/clarity-editorial.jpg"
+      - es: "horizon-teal — fresco y confiable (hospedaje/veterinarias)"
+        en: "horizon-teal — fresh and trustworthy (boarding/vet clinics)"
+        image_url: "https://www.hmulink.com/assets/previews/horizon-teal.jpg"
 
   # business_type is optional and only gates two COSMETIC blocks (portfolio,
   # delivery/pickup links) — never required data. Answers are keyword-scored
@@ -156,17 +214,6 @@ questions:
       es: "Un servicio por línea. Ej: Baño y corte — desde $350 MXN"
       en: "One service per line. E.g.: Full groom — from $45"
 
-  - id: price_display
-    type: dropdown
-    name: price_display
-    title:
-      es: "¿Cómo deben aparecer los precios en tu página pública?"
-      en: "How should prices appear on your public page?"
-    options:
-      - {es: "Mostrar todos los precios", en: "Show all prices"}
-      - {es: "No mostrar precios", en: "Don't show prices"}
-      - {es: "Mixto — algunos precios sí, otros no", en: "Mixed — some shown, some hidden"}
-
   - id: featured_text
     type: textarea
     name: featured_text
@@ -220,16 +267,6 @@ questions:
   # propio Tally y se lee como ejemplo, no como instruccion. Los titulos
   # nuevos estan dados de alta en tally-field-aliases.json, asi que el worker
   # sigue reconociendo la respuesta por titulo ademas de por `name`.
-  - id: portfolio_link
-    type: link
-    name: portfolio_link
-    title:
-      es: "Enlace a fotos de tu trabajo (opcional)"
-      en: "Link to photos of your work (optional)"
-    placeholder:
-      es: "Tu Instagram, un álbum de Google Fotos, tu sitio…"
-      en: "Your Instagram, a Google Photos album, your website…"
-
   # --- Fotos ---
   #
   # Las tres preguntas dicen la FORMA y los LIMITES porque el recorte y el
@@ -280,7 +317,13 @@ questions:
       es: "Ej: Trae cartilla de vacunación. Perros con correa, gatos en transportadora."
       en: "E.g.: Bring vaccination records. Dogs on leash, cats in carriers."
 
-  # --- Legal (no mapea a proposito — confirmacion interna, no dato del cliente) ---
+  # --- Legal (confirmacion interna: SI se guarda, pero NO se imprime) ---
+  # Desde linkFactory/16 (2026-07-27) esta casilla SI mapea: el
+  # tally-field-aliases.json de la vertical la declara y el `intake.fields` de
+  # su vertical.yaml la escribe al client.json. Antes solo vivia en el blob
+  # crudo del intake, que caduca a los 90 dias mientras la pagina con las fotos
+  # es permanente (dictamen pawcontact/6). Sigue sin salir en la pagina: es una
+  # declaracion de cumplimiento, no un dato del negocio.
   - id: photo_rights
     type: checkboxes
     name: photo_rights_confirmed
