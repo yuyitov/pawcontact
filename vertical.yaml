@@ -65,6 +65,10 @@ strings_overrides:
 blocks:
   portfolio:
     enabled_for: none
+  # ACTIVACION del vCard (linkFactory/22). Ver la nota larga en
+  # verticals/hmu/vertical.yaml: misma razon, mismo alcance.
+  vcard:
+    enabled_for: all
 
 # Como se LEE el intake de esta vertical (ver INTAKE_DEFAULTS en
 # vertical_config.py). El worker extrae estos campos como texto —solo porque el
