@@ -69,6 +69,10 @@ blocks:
   # verticals/hmu/vertical.yaml: misma razon, mismo alcance.
   vcard:
     enabled_for: all
+  # ACTIVACION del pase de Google Wallet (linkFactory/18). Ver la nota larga en
+  # el vertical.yaml de HMU Link: misma razon, mismo alcance.
+  wallet_google:
+    enabled_for: all
 
 # Como se LEE el intake de esta vertical (ver INTAKE_DEFAULTS en
 # vertical_config.py). El worker extrae estos campos como texto —solo porque el
