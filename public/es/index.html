@@ -181,7 +181,13 @@ p { max-width: 66ch; }
 .style__sw { height: 76px; display: flex; }
 .style__sw i { flex: 1; }
 .style__shot { background: var(--paper); border-bottom: 1px solid var(--line); }
-.style__shot img { display: block; width: 100%; aspect-ratio: 8 / 5; object-fit: cover; object-position: top; }
+/* 4/5 y no 8/5 (linkFactory/26, elegido por Vero el 2026-07-31). Medido: la
+   columna de contenido de la tarjeta ocupa 508px, asi que en un encuadre
+   apaisado el 57% eran margenes vacios y los botones salian ilegibles. En
+   apaisado NO CABE el hero completo —se probo a seis anchos—: habia que elegir
+   entre "todo pequeno" y "botones grandes sin el nombre del negocio". Vertical
+   caben las dos cosas. */
+.style__shot img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; }
 .style__body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
 .style__body p { color: var(--muted); font-size: .93rem; margin-bottom: 6px; }
 .style__for { font-size: .84rem; color: var(--brand-deep); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
@@ -511,6 +517,15 @@ try {
     if (!buttons.length) { return; }
     var shot = card.querySelector('.style__shot img');
     var label = card.querySelector('[data-palette-name]');
+    // El enlace al demo grande tiene que LLEVARSE la paleta elegida. Sin esto
+    // repintabamos la miniatura y luego abriamos el demo con la paleta
+    // horneada: la clienta elegia Salvia y se le abria Crema (fallo de Vero,
+    // 2026-07-31). `data-demo-base` guarda el enlace limpio para poder volver
+    // a el cuando se elige la paleta por omision.
+    var link = card.querySelector('.style__link');
+    if (link && !link.getAttribute('data-demo-base')) {
+      link.setAttribute('data-demo-base', link.getAttribute('href'));
+    }
     buttons.forEach(function (button) {
       button.addEventListener('click', function () {
         if (shot) {
@@ -519,6 +534,13 @@ try {
           shot.alt = button.getAttribute('data-alt') || '';
         }
         if (label) { label.textContent = button.getAttribute('data-palette'); }
+        if (link) {
+          // Siempre con `?p=`, tambien en la primera paleta: la tienda no sabe
+          // con cual se horneo el demo, y no siempre es la primera de la lista.
+          var base = link.getAttribute('data-demo-base');
+          var slug = button.getAttribute('data-palette-slug');
+          link.href = slug ? base + '?p=' + encodeURIComponent(slug) : base;
+        }
         buttons.forEach(function (other) {
           var on = other === button;
           other.classList.toggle('is-on', on);

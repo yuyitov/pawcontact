@@ -74,6 +74,25 @@ blocks:
   wallet_google:
     enabled_for: all
 
+# Reglas de forma del payload (ver SCHEMA_DEFAULTS en vertical_config.py).
+schema:
+  # DECIDIDO por Vero el 2026-07-27 (pawcontact/7), EJECUTADO en el lote unico
+  # del 2026-07-31: el consentimiento de derechos de imagen es OBLIGATORIO. Sin
+  # el, el generador se niega a publicar la pagina del cliente.
+  #
+  # Lo que frenaba esto era que los client.json existentes son anteriores al
+  # campo y dejarian de regenerarse. Por el hecho base charly/30, TODOS los
+  # clientes existentes son compras de prueba de la propia Vero — no hay ningun
+  # cliente real que romper — y el unico que hay (pawpawpaw-kb00lze) queda
+  # backfilleado en el mismo lote.
+  #
+  # PawContact publica FOTOS de negocios: publicar sin consentimiento registrado
+  # es el hueco legal que el producto no debe tener. Las DEMOS quedan fuera del
+  # gate a proposito (ver `declaraciones_relajadas_por_ser_demo`): ahi no hay
+  # cliente que firme, y exigirlo seria firmar un consentimiento ajeno.
+  require_true:
+    - photo_rights_confirmed
+
 # Como se LEE el intake de esta vertical (ver INTAKE_DEFAULTS en
 # vertical_config.py). El worker extrae estos campos como texto —solo porque el
 # tally-field-aliases.json de al lado los declara— y aqui se dice en que se
@@ -92,11 +111,10 @@ intake:
     # build_client_from_intake lo ESCRIBA al client.json. Con solo la primera,
     # el campo llega al payload y se tira ahi mismo.
     #
-    # NO se declara `schema.require_true` (ModaLink si lo hace). Ahi la casilla
-    # es un gate: sin ella el generador se niega a publicar. Prenderlo aqui
-    # dejaria de generar las paginas de los clientes que YA compraron, porque
-    # sus client.json son anteriores al campo y no lo traen. Es una decision de
-    # producto de Vero, no del re-export; queda fichada.
+    # YA se declara `schema.require_true` arriba (2026-07-31, pawcontact/7).
+    # Esta nota decia lo contrario y explicaba por que aun no: los client.json
+    # existentes eran anteriores al campo. Se resolvio backfilleando el unico
+    # que hay, que es una compra de prueba de la propia Vero.
     photo_rights_confirmed: {kind: yes_no}
 
 # Datos legales de la vertical (Ola 1b). Los consumen las plantillas de
