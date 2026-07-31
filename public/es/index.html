@@ -187,6 +187,18 @@ p { max-width: 66ch; }
 .style__for { font-size: .84rem; color: var(--brand-deep); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
 .style__link { margin-top: auto; font-weight: 700; color: var(--accent); text-decoration: none; font-size: .93rem; }
 .style__link:hover { text-decoration: underline; }
+/* Selector de paleta: para un catalogo de pocos disenos con varias paletas.
+   Repinta la captura de la tarjeta sin recargar la pagina. */
+.style__palname { font-size: .84rem; color: var(--muted); margin-bottom: 6px; }
+.style__palname strong { color: var(--ink); }
+/* Las cuatro paletas caben SIEMPRE en una fila: en dos filas de 3+1 la cuarta
+   parece un añadido y no una hermana de las otras tres. */
+.style__palettes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.style__palette { display: flex; height: 28px; padding: 0; overflow: hidden; cursor: pointer; background: none; border: 1px solid var(--line); border-radius: 6px; }
+.style__palette i { flex: 1; }
+.style__palette:hover { border-color: var(--brand-deep); }
+.style__palette.is-on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.style__palette:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Pricing */
 .pricing { background: var(--accent); color: var(--paper); }
@@ -284,7 +296,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
     </nav>
     <div class="top-actions">
       <div class="lang"><span>ES</span><a href="/" hreflang="en-US" lang="en-US">EN</a></div>
-      <a class="btn btn--primary btn--mini" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b">Quiero mi link</a>
+      <a class="btn btn--primary btn--mini" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b?locale=es">Quiero mi link</a>
     </div>
   </div>
 </header>
@@ -298,7 +310,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
       <h1>Todo lo que te preguntan por DM, en un solo link.</h1>
       <p class="sub">PawContact te arma una tarjeta digital con tus servicios, precios, paquetes, horarios y botones de contacto. Hecha para estéticas caninas, veterinarias, hoteles, entrenadores y boutiques de mascotas. Pagas una vez y tu link queda listo el mismo día.</p>
       <div class="hero-cta">
-        <a class="btn btn--primary" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b">Quiero mi PawContact →</a>
+        <a class="btn btn--primary" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b?locale=es">Quiero mi PawContact →</a>
         <a class="btn btn--ghost" href="#styles">Ver ejemplos reales</a>
       </div>
       <div class="trust"><span>Sin apps</span><span>Sin mensualidades</span><span>Listo el mismo día</span></div>
@@ -387,7 +399,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
         <span class="badge">💳 Pago único</span><span class="badge">🚫 Sin suscripciones</span><span class="badge">⚡ Listo el mismo día</span>
       </div>
       <ul class="inc-list"><li>1 tarjeta digital publicada</li><li>1 estilo visual a tu elección</li><li>Promoción o paquete destacado</li><li>Código QR + link para compartir</li><li>2 modificaciones incluidas</li></ul>
-      <a class="btn btn--primary" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b">Quiero mi PawContact →</a>
+      <a class="btn btn--primary" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b?locale=es">Quiero mi PawContact →</a>
       <p class="guarantee">Si no te encanta tu tarjeta, te devolvemos tu dinero.</p>
     </div>
   </div>
@@ -417,7 +429,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
   <div class="wrap">
     <h2 class="reveal">Deja de escribir tu lista de precios en cada DM.</h2>
     <p class="reveal">Un link con todo lo que te preguntan. Pagas una vez y hoy mismo lo tienes.</p>
-    <a class="btn btn--primary reveal" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b">Quiero mi PawContact →</a>
+    <a class="btn btn--primary reveal" href="https://buy.stripe.com/9B6eVdab4eSqfcu06uffy0b?locale=es">Quiero mi PawContact →</a>
   </div>
 </section>
 
@@ -488,6 +500,34 @@ try {
 } catch (e) {
   revealAll();
 }
+
+// Selector de paleta dentro de cada diseno. Solo actua si la tarjeta lo trae:
+// una vertical sin `palettes:` no ejecuta nada de esto. Fail-open igual que el
+// reveal: si algo truena, la tarjeta se queda con la captura que ya sirvio el
+// servidor, que es una imagen valida del diseno.
+try {
+  document.querySelectorAll('.style').forEach(function (card) {
+    var buttons = card.querySelectorAll('.style__palette');
+    if (!buttons.length) { return; }
+    var shot = card.querySelector('.style__shot img');
+    var label = card.querySelector('[data-palette-name]');
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (shot) {
+          shot.setAttribute('loading', 'eager');
+          shot.src = button.getAttribute('data-preview');
+          shot.alt = button.getAttribute('data-alt') || '';
+        }
+        if (label) { label.textContent = button.getAttribute('data-palette'); }
+        buttons.forEach(function (other) {
+          var on = other === button;
+          other.classList.toggle('is-on', on);
+          other.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+      });
+    });
+  });
+} catch (e) { /* la captura servida sigue siendo valida */ }
 </script>
 </body>
 </html>

@@ -187,6 +187,18 @@ p { max-width: 66ch; }
 .style__for { font-size: .84rem; color: var(--brand-deep); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
 .style__link { margin-top: auto; font-weight: 700; color: var(--accent); text-decoration: none; font-size: .93rem; }
 .style__link:hover { text-decoration: underline; }
+/* Selector de paleta: para un catalogo de pocos disenos con varias paletas.
+   Repinta la captura de la tarjeta sin recargar la pagina. */
+.style__palname { font-size: .84rem; color: var(--muted); margin-bottom: 6px; }
+.style__palname strong { color: var(--ink); }
+/* Las cuatro paletas caben SIEMPRE en una fila: en dos filas de 3+1 la cuarta
+   parece un añadido y no una hermana de las otras tres. */
+.style__palettes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.style__palette { display: flex; height: 28px; padding: 0; overflow: hidden; cursor: pointer; background: none; border: 1px solid var(--line); border-radius: 6px; }
+.style__palette i { flex: 1; }
+.style__palette:hover { border-color: var(--brand-deep); }
+.style__palette.is-on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.style__palette:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Pricing */
 .pricing { background: var(--accent); color: var(--paper); }
@@ -284,7 +296,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
     </nav>
     <div class="top-actions">
       <div class="lang"><span>EN</span><a href="/es/" hreflang="es-MX" lang="es-MX">ES</a></div>
-      <a class="btn btn--primary btn--mini" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a">Get my link</a>
+      <a class="btn btn--primary btn--mini" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a?locale=en">Get my link</a>
     </div>
   </div>
 </header>
@@ -298,7 +310,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
       <h1>Everything pet parents ask you in DMs, in one link.</h1>
       <p class="sub">PawContact builds you a mobile-friendly digital business card with your services, prices, packages, hours, and contact buttons. Made for groomers, vets, boarding, training, and pet boutiques. Pay once, get your link the same day.</p>
       <div class="hero-cta">
-        <a class="btn btn--primary" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a">Get my PawContact →</a>
+        <a class="btn btn--primary" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a?locale=en">Get my PawContact →</a>
         <a class="btn btn--ghost" href="#styles">View live examples</a>
       </div>
       <div class="trust"><span>No app to download</span><span>No subscriptions</span><span>Ready same day</span></div>
@@ -387,7 +399,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
         <span class="badge">💳 One-time payment</span><span class="badge">🚫 No subscriptions</span><span class="badge">⚡ Same-day delivery</span>
       </div>
       <ul class="inc-list"><li>1 published digital card</li><li>1 visual style of your choice</li><li>Featured promotion or package</li><li>QR code + shareable link</li><li>2 modifications included</li></ul>
-      <a class="btn btn--primary" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a">Get my PawContact →</a>
+      <a class="btn btn--primary" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a?locale=en">Get my PawContact →</a>
       <p class="guarantee">If you don&#x27;t love your card, you get your money back.</p>
     </div>
   </div>
@@ -417,7 +429,7 @@ footer a:hover { color: #fff; text-decoration: underline; }
   <div class="wrap">
     <h2 class="reveal">Stop typing your price list into DMs.</h2>
     <p class="reveal">One link with everything pet parents ask. Pay once, get it today.</p>
-    <a class="btn btn--primary reveal" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a">Get my PawContact →</a>
+    <a class="btn btn--primary reveal" href="https://buy.stripe.com/4gM9AT1Ey7pY1lE7yWffy0a?locale=en">Get my PawContact →</a>
   </div>
 </section>
 
@@ -488,6 +500,34 @@ try {
 } catch (e) {
   revealAll();
 }
+
+// Selector de paleta dentro de cada diseno. Solo actua si la tarjeta lo trae:
+// una vertical sin `palettes:` no ejecuta nada de esto. Fail-open igual que el
+// reveal: si algo truena, la tarjeta se queda con la captura que ya sirvio el
+// servidor, que es una imagen valida del diseno.
+try {
+  document.querySelectorAll('.style').forEach(function (card) {
+    var buttons = card.querySelectorAll('.style__palette');
+    if (!buttons.length) { return; }
+    var shot = card.querySelector('.style__shot img');
+    var label = card.querySelector('[data-palette-name]');
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (shot) {
+          shot.setAttribute('loading', 'eager');
+          shot.src = button.getAttribute('data-preview');
+          shot.alt = button.getAttribute('data-alt') || '';
+        }
+        if (label) { label.textContent = button.getAttribute('data-palette'); }
+        buttons.forEach(function (other) {
+          var on = other === button;
+          other.classList.toggle('is-on', on);
+          other.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+      });
+    });
+  });
+} catch (e) { /* la captura servida sigue siendo valida */ }
 </script>
 </body>
 </html>
