@@ -1,0 +1,135 @@
+{
+  "public_slug": "bahia-azul",
+  "business_name": "Bahía Azul",
+  "business_type": "wellness",
+  "brand_style": "horizon-teal",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 322 175 8846",
+  "instagram": "https://instagram.com/bahiaazul.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/bahiaazul.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Bahía+Azul+Demo",
+  "google_reviews_url": "https://g.page/r/bahia-azul-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Hotel y veterinaria frente al mar para huéspedes de cuatro patas 🌊",
+      "address": "Av. Francisco Medina Ascencio 2605, Zona Hotelera, Puerto Vallarta",
+      "opening_hours_text": "Lun–Dom 8:00–20:00 · Urgencias 24/7 para huéspedes",
+      "service_categories": [
+        "Hotel",
+        "Veterinaria",
+        "Playa"
+      ],
+      "services": [
+        {
+          "category": "Hotel",
+          "name": "Noche estándar con patio",
+          "price_label": "$320 MXN"
+        },
+        {
+          "category": "Hotel",
+          "name": "Suite con cámara y clima",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Hotel",
+          "name": "Semana completa (suite)",
+          "price_label": "$2,790 MXN"
+        },
+        {
+          "category": "Veterinaria",
+          "name": "Consulta para huéspedes",
+          "price_label": "$350 MXN"
+        },
+        {
+          "category": "Veterinaria",
+          "name": "Consulta para visitantes",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Playa",
+          "name": "Paseo de playa supervisado (45 min)",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Playa",
+          "name": "Enjuague y secado post-playa",
+          "price_label": "$150 MXN"
+        }
+      ],
+      "pet_notes_text": "Urgencias 24/7 incluidas para huéspedes.\nRecibimos huéspedes de turistas con reservación anticipada.",
+      "policies": [
+        "Check-out a las 12:00; hora extra $50.",
+        "Cartilla al día obligatoria.",
+        "Paseos de playa sujetos a clima."
+      ],
+      "featured_package": {
+        "name": "Semana Marinera",
+        "description": "7 noches en suite + 3 paseos de playa + consulta + enjuague final",
+        "price_label": "$3,290 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Beachfront hotel and vet care for four-legged guests 🌊",
+      "address": "Av. Francisco Medina Ascencio 2605, Hotel Zone, Puerto Vallarta",
+      "opening_hours_text": "Mon–Sun 8:00–20:00 · 24/7 emergencies for guests",
+      "service_categories": [
+        "Hotel",
+        "Veterinary",
+        "Beach"
+      ],
+      "services": [
+        {
+          "category": "Hotel",
+          "name": "Standard night with patio",
+          "price_label": "$320 MXN"
+        },
+        {
+          "category": "Hotel",
+          "name": "Suite with camera and A/C",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Hotel",
+          "name": "Full week (suite)",
+          "price_label": "$2,790 MXN"
+        },
+        {
+          "category": "Veterinary",
+          "name": "Guest consultation",
+          "price_label": "$350 MXN"
+        },
+        {
+          "category": "Veterinary",
+          "name": "Visitor consultation",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Beach",
+          "name": "Supervised beach walk (45 min)",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Beach",
+          "name": "Post-beach rinse and dry",
+          "price_label": "$150 MXN"
+        }
+      ],
+      "pet_notes_text": "24/7 emergencies included for guests.\nTourists' pets welcome with advance booking.",
+      "policies": [
+        "Check-out at noon; late hour $50.",
+        "Up-to-date vaccination card required.",
+        "Beach walks subject to weather."
+      ],
+      "featured_package": {
+        "name": "Sailor Week",
+        "description": "7 suite nights + 3 beach walks + consultation + final rinse",
+        "price_label": "$3,290 MXN"
+      }
+    }
+  }
+}

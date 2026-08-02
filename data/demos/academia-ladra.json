@@ -1,0 +1,137 @@
+{
+  "public_slug": "academia-ladra",
+  "business_name": "Academia Ladra",
+  "business_type": "wellness",
+  "brand_style": "electric-slate",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 7038 2291",
+  "instagram": "https://instagram.com/academialadra.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/academialadra.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Academia+Ladra+Demo",
+  "google_reviews_url": "https://g.page/r/academia-ladra-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Entrenamiento y guardería con reporte diario por WhatsApp ⚡🐕",
+      "address": "Calz. Desierto de los Leones 5240, Tetelpan, CDMX",
+      "opening_hours_text": "Lun–Vie 7:00–19:00 · Sáb 8:00–14:00",
+      "service_categories": [
+        "Guardería",
+        "Entrenamiento",
+        "Paseos"
+      ],
+      "services": [
+        {
+          "category": "Guardería",
+          "name": "Día completo de guardería",
+          "price_label": "$350 MXN",
+          "description": "Incluye reporte con fotos por WhatsApp"
+        },
+        {
+          "category": "Guardería",
+          "name": "Medio día (hasta 5 horas)",
+          "price_label": "$220 MXN"
+        },
+        {
+          "category": "Guardería",
+          "name": "Paquete 10 días",
+          "price_label": "$3,100 MXN"
+        },
+        {
+          "category": "Entrenamiento",
+          "name": "Obediencia básica (6 sesiones)",
+          "price_label": "$2,600 MXN"
+        },
+        {
+          "category": "Entrenamiento",
+          "name": "Modificación de conducta (evaluación)",
+          "price_label": "$550 MXN"
+        },
+        {
+          "category": "Paseos",
+          "name": "Paseo grupal (60 min)",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Paseos",
+          "name": "Paseo individual (45 min)",
+          "price_label": "$220 MXN"
+        }
+      ],
+      "pet_notes_text": "Prueba de socialización gratuita el primer día.\nTodos los perros requieren cartilla al día.",
+      "policies": [
+        "Grupos máximos de 8 perros por entrenador.",
+        "Reporte diario con fotos incluido.",
+        "Recolección a domicilio en zona sur con costo extra."
+      ],
+      "featured_package": {
+        "name": "Combo Energía",
+        "description": "5 días de guardería + 2 paseos individuales + 1 sesión de obediencia",
+        "price_label": "$2,150 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Training and daycare with daily WhatsApp report cards ⚡🐕",
+      "address": "Calz. Desierto de los Leones 5240, Tetelpan, Mexico City",
+      "opening_hours_text": "Mon–Fri 7:00–19:00 · Sat 8:00–14:00",
+      "service_categories": [
+        "Daycare",
+        "Training",
+        "Walks"
+      ],
+      "services": [
+        {
+          "category": "Daycare",
+          "name": "Full daycare day",
+          "price_label": "$350 MXN",
+          "description": "Includes WhatsApp photo report"
+        },
+        {
+          "category": "Daycare",
+          "name": "Half day (up to 5 hours)",
+          "price_label": "$220 MXN"
+        },
+        {
+          "category": "Daycare",
+          "name": "10-day pass",
+          "price_label": "$3,100 MXN"
+        },
+        {
+          "category": "Training",
+          "name": "Basic obedience (6 sessions)",
+          "price_label": "$2,600 MXN"
+        },
+        {
+          "category": "Training",
+          "name": "Behavior modification (evaluation)",
+          "price_label": "$550 MXN"
+        },
+        {
+          "category": "Walks",
+          "name": "Group walk (60 min)",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Walks",
+          "name": "Solo walk (45 min)",
+          "price_label": "$220 MXN"
+        }
+      ],
+      "pet_notes_text": "Free socialization trial on day one.\nAll dogs need an up-to-date vaccination card.",
+      "policies": [
+        "Groups capped at 8 dogs per trainer.",
+        "Daily photo report included.",
+        "South-side home pickup for an extra fee."
+      ],
+      "featured_package": {
+        "name": "Energy Combo",
+        "description": "5 daycare days + 2 solo walks + 1 obedience session",
+        "price_label": "$2,150 MXN"
+      }
+    }
+  }
+}

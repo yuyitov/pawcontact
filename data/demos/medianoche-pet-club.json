@@ -1,0 +1,127 @@
+{
+  "public_slug": "medianoche-pet-club",
+  "business_name": "Medianoche Pet Club",
+  "business_type": "wellness",
+  "brand_style": "midnight-ink",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 8194 3307",
+  "instagram": "https://instagram.com/medianochepetclub.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/medianochepetclub.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Medianoche+Pet+Club+Demo",
+  "google_reviews_url": "https://g.page/r/medianoche-pet-club-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Club premium: spa nocturno, membresías y atención dedicada 🌙",
+      "address": "Av. Álvaro Obregón 185, Roma Norte, CDMX",
+      "opening_hours_text": "Mié–Lun 12:00–22:00 · Mar cerrado",
+      "service_categories": [
+        "Membresías",
+        "Spa nocturno",
+        "Eventos"
+      ],
+      "services": [
+        {
+          "category": "Membresías",
+          "name": "Membresía mensual Club Luna",
+          "price_label": "$1,200 MXN",
+          "description": "Spa quincenal + guardería nocturna con descuento"
+        },
+        {
+          "category": "Membresías",
+          "name": "Membresía anual Club Eclipse",
+          "price_label": "$11,900 MXN"
+        },
+        {
+          "category": "Spa nocturno",
+          "name": "Spa nocturno completo (19:00–22:00)",
+          "price_label": "$520 MXN"
+        },
+        {
+          "category": "Spa nocturno",
+          "name": "Estancia nocturna con cámara en vivo",
+          "price_label": "$420 MXN"
+        },
+        {
+          "category": "Eventos",
+          "name": "Cumpleaños privado (hasta 10 invitados)",
+          "price_label": "$2,800 MXN"
+        },
+        {
+          "category": "Eventos",
+          "name": "Sesión de fotos profesional",
+          "price_label": "$950 MXN"
+        }
+      ],
+      "pet_notes_text": "Solo razas sociables en eventos grupales.\nMembresía incluye prioridad de agenda.",
+      "policies": [
+        "Eventos se apartan con 2 semanas.",
+        "Cancelación de membresía con 30 días de aviso.",
+        "Acceso con cartilla al día."
+      ],
+      "featured_package": {
+        "name": "Noche de Gala",
+        "description": "Spa nocturno + sesión de fotos + caja de premios premium",
+        "price_label": "$1,390 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Premium club: night spa, memberships and dedicated care 🌙",
+      "address": "Av. Álvaro Obregón 185, Roma Norte, Mexico City",
+      "opening_hours_text": "Wed–Mon 12:00–22:00 · Tue closed",
+      "service_categories": [
+        "Memberships",
+        "Night spa",
+        "Events"
+      ],
+      "services": [
+        {
+          "category": "Memberships",
+          "name": "Club Luna monthly membership",
+          "price_label": "$1,200 MXN",
+          "description": "Biweekly spa + discounted overnight care"
+        },
+        {
+          "category": "Memberships",
+          "name": "Club Eclipse annual membership",
+          "price_label": "$11,900 MXN"
+        },
+        {
+          "category": "Night spa",
+          "name": "Full night spa (7–10 pm)",
+          "price_label": "$520 MXN"
+        },
+        {
+          "category": "Night spa",
+          "name": "Overnight stay with live camera",
+          "price_label": "$420 MXN"
+        },
+        {
+          "category": "Events",
+          "name": "Private birthday (up to 10 guests)",
+          "price_label": "$2,800 MXN"
+        },
+        {
+          "category": "Events",
+          "name": "Professional photo session",
+          "price_label": "$950 MXN"
+        }
+      ],
+      "pet_notes_text": "Sociable breeds only for group events.\nMembership includes booking priority.",
+      "policies": [
+        "Events booked 2 weeks ahead.",
+        "Membership cancellation with 30-day notice.",
+        "Up-to-date vaccination card required."
+      ],
+      "featured_package": {
+        "name": "Gala Night",
+        "description": "Night spa + photo session + premium treat box",
+        "price_label": "$1,390 MXN"
+      }
+    }
+  }
+}

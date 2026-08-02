@@ -1,0 +1,137 @@
+{
+  "public_slug": "canela-y-oro",
+  "business_name": "Canela & Oro",
+  "business_type": "retail",
+  "brand_style": "black-gold",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 55 4821 7730",
+  "instagram": "https://instagram.com/canelayoro.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/canelayoro.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Canela+y+Oro+Demo",
+  "google_reviews_url": "https://g.page/r/canela-y-oro-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Boutique premium para mascotas: accesorios finos y regalos 🐾✨",
+      "address": "Av. Presidente Masaryk 214, Polanco, CDMX",
+      "opening_hours_text": "Lun–Sáb 11:00–20:00 · Dom 12:00–18:00",
+      "service_categories": [
+        "Accesorios",
+        "Regalos",
+        "A la medida"
+      ],
+      "services": [
+        {
+          "category": "Accesorios",
+          "name": "Collar de piel con placa grabada",
+          "price_label": "$650 MXN"
+        },
+        {
+          "category": "Accesorios",
+          "name": "Correa de piel trenzada",
+          "price_label": "$780 MXN"
+        },
+        {
+          "category": "Accesorios",
+          "name": "Pañoleta de seda estampada",
+          "price_label": "$320 MXN"
+        },
+        {
+          "category": "Regalos",
+          "name": "Caja regalo Bienvenido a Casa",
+          "price_label": "$950 MXN",
+          "description": "Manta, juguete y premios artesanales"
+        },
+        {
+          "category": "Regalos",
+          "name": "Set de cumpleaños con pastel pet-friendly",
+          "price_label": "$540 MXN"
+        },
+        {
+          "category": "A la medida",
+          "name": "Suéter tejido a la medida",
+          "price_label": "Desde $890 MXN"
+        },
+        {
+          "category": "A la medida",
+          "name": "Cama bordada con nombre",
+          "price_label": "Desde $1,850 MXN"
+        }
+      ],
+      "pet_notes_text": "Grabado de placas en 24 horas.\nEnvíos a todo México.",
+      "policies": [
+        "Cambios dentro de los primeros 7 días con etiqueta.",
+        "Artículos a la medida no tienen cambio.",
+        "Aparta con el 50% por WhatsApp."
+      ],
+      "featured_package": {
+        "name": "Kit Consentido de Lujo",
+        "description": "Collar + correa de piel, pañoleta y caja regalo con grabado incluido",
+        "price_label": "$1,990 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Premium pet boutique: fine accessories and gifts 🐾✨",
+      "address": "Av. Presidente Masaryk 214, Polanco, Mexico City",
+      "opening_hours_text": "Mon–Sat 11:00–20:00 · Sun 12:00–18:00",
+      "service_categories": [
+        "Accessories",
+        "Gifts",
+        "Made to order"
+      ],
+      "services": [
+        {
+          "category": "Accessories",
+          "name": "Leather collar with engraved tag",
+          "price_label": "$650 MXN"
+        },
+        {
+          "category": "Accessories",
+          "name": "Braided leather leash",
+          "price_label": "$780 MXN"
+        },
+        {
+          "category": "Accessories",
+          "name": "Printed silk bandana",
+          "price_label": "$320 MXN"
+        },
+        {
+          "category": "Gifts",
+          "name": "Welcome Home gift box",
+          "price_label": "$950 MXN",
+          "description": "Blanket, toy and artisanal treats"
+        },
+        {
+          "category": "Gifts",
+          "name": "Birthday set with pet-friendly cake",
+          "price_label": "$540 MXN"
+        },
+        {
+          "category": "Made to order",
+          "name": "Custom knitted sweater",
+          "price_label": "From $890 MXN"
+        },
+        {
+          "category": "Made to order",
+          "name": "Embroidered bed with name",
+          "price_label": "From $1,850 MXN"
+        }
+      ],
+      "pet_notes_text": "Tag engraving ready in 24 hours.\nWe ship all over Mexico.",
+      "policies": [
+        "Exchanges within 7 days with tags on.",
+        "Made-to-order items are final sale.",
+        "Reserve with a 50% deposit via WhatsApp."
+      ],
+      "featured_package": {
+        "name": "Deluxe Spoiled Kit",
+        "description": "Leather collar + leash, bandana and gift box, engraving included",
+        "price_label": "$1,990 MXN"
+      }
+    }
+  }
+}

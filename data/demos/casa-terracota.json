@@ -1,0 +1,137 @@
+{
+  "public_slug": "casa-terracota",
+  "business_name": "Casa Terracota",
+  "business_type": "retail",
+  "brand_style": "terracotta-warm",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 999 412 6674",
+  "instagram": "https://instagram.com/casaterracota.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/casaterracota.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Casa+Terracota+Demo",
+  "google_reviews_url": "https://g.page/r/casa-terracota-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Pensión familiar y boutique artesanal para tu mascota 🧡",
+      "address": "Calle 60 #345, Centro, Mérida, Yucatán",
+      "opening_hours_text": "Lun–Sáb 9:00–19:00 · Entregas de pensión Dom 10:00–12:00",
+      "service_categories": [
+        "Pensión",
+        "Boutique",
+        "Extras"
+      ],
+      "services": [
+        {
+          "category": "Pensión",
+          "name": "Noche de pensión (habitación individual)",
+          "price_label": "$280 MXN",
+          "description": "Sin jaulas: habitaciones con cámara"
+        },
+        {
+          "category": "Pensión",
+          "name": "Semana completa",
+          "price_label": "$1,750 MXN"
+        },
+        {
+          "category": "Pensión",
+          "name": "Cuidado de gatos en casa (visita diaria)",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Boutique",
+          "name": "Juguetes artesanales de henequén",
+          "price_label": "Desde $120 MXN"
+        },
+        {
+          "category": "Boutique",
+          "name": "Premios horneados de la casa",
+          "price_label": "$95 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Baño de salida",
+          "price_label": "$200 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Video-llamada con tu mascota",
+          "price_label": "Sin costo"
+        }
+      ],
+      "pet_notes_text": "Requiere cartilla al día y prueba de una noche.\nMandamos fotos todas las noches.",
+      "policies": [
+        "Check-in hasta las 18:00.",
+        "Alimento propio del huésped bienvenido.",
+        "Apartado de temporada alta con 50%."
+      ],
+      "featured_package": {
+        "name": "Vacaciones Terracota",
+        "description": "7 noches + baño de salida + juguete artesanal de regalo",
+        "price_label": "$1,990 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Family boarding and artisanal boutique for your pet 🧡",
+      "address": "Calle 60 #345, Centro, Mérida, Yucatán",
+      "opening_hours_text": "Mon–Sat 9:00–19:00 · Boarding pickups Sun 10:00–12:00",
+      "service_categories": [
+        "Boarding",
+        "Boutique",
+        "Extras"
+      ],
+      "services": [
+        {
+          "category": "Boarding",
+          "name": "Boarding night (private room)",
+          "price_label": "$280 MXN",
+          "description": "No cages: rooms with cameras"
+        },
+        {
+          "category": "Boarding",
+          "name": "Full week",
+          "price_label": "$1,750 MXN"
+        },
+        {
+          "category": "Boarding",
+          "name": "Cat sitting at home (daily visit)",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Boutique",
+          "name": "Artisanal henequen toys",
+          "price_label": "From $120 MXN"
+        },
+        {
+          "category": "Boutique",
+          "name": "House-baked treats",
+          "price_label": "$95 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Exit bath",
+          "price_label": "$200 MXN"
+        },
+        {
+          "category": "Extras",
+          "name": "Video call with your pet",
+          "price_label": "Free"
+        }
+      ],
+      "pet_notes_text": "Up-to-date card and a one-night trial required.\nWe send photos every night.",
+      "policies": [
+        "Check-in until 6 pm.",
+        "Your pet's own food is welcome.",
+        "High-season booking with 50% deposit."
+      ],
+      "featured_package": {
+        "name": "Terracota Holidays",
+        "description": "7 nights + exit bath + artisanal toy gift",
+        "price_label": "$1,990 MXN"
+      }
+    }
+  }
+}

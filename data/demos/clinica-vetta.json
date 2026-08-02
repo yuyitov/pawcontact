@@ -1,0 +1,135 @@
+{
+  "public_slug": "clinica-vetta",
+  "business_name": "Clínica Vetta",
+  "business_type": "professional",
+  "brand_style": "charcoal-clean",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 81 2946 5513",
+  "instagram": "https://instagram.com/clinicavetta.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/clinicavetta.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Clínica+Vetta+Demo",
+  "google_reviews_url": "https://g.page/r/clinica-vetta-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Veterinaria y adiestramiento con plan de bienestar integral 🩺",
+      "address": "Av. Eugenio Garza Sada 3820, Contry, Monterrey",
+      "opening_hours_text": "Lun–Vie 9:00–20:00 · Sáb 9:00–14:00 · Urgencias por WhatsApp",
+      "service_categories": [
+        "Consulta",
+        "Prevención",
+        "Adiestramiento"
+      ],
+      "services": [
+        {
+          "category": "Consulta",
+          "name": "Consulta general",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Consulta",
+          "name": "Consulta de seguimiento",
+          "price_label": "$300 MXN"
+        },
+        {
+          "category": "Prevención",
+          "name": "Esquema de vacunación canina",
+          "price_label": "Desde $380 MXN"
+        },
+        {
+          "category": "Prevención",
+          "name": "Desparasitación interna y externa",
+          "price_label": "$250 MXN"
+        },
+        {
+          "category": "Prevención",
+          "name": "Perfil geriátrico (sangre + revisión)",
+          "price_label": "$1,150 MXN"
+        },
+        {
+          "category": "Adiestramiento",
+          "name": "Evaluación de conducta (60 min)",
+          "price_label": "$500 MXN"
+        },
+        {
+          "category": "Adiestramiento",
+          "name": "Paquete obediencia básica (6 sesiones)",
+          "price_label": "$2,400 MXN"
+        }
+      ],
+      "pet_notes_text": "Urgencias fuera de horario solo por WhatsApp.\nPrimera evaluación de conducta sin costo al vacunar.",
+      "policies": [
+        "Consulta con cita; urgencias se atienden según llegada.",
+        "Resultados de laboratorio en 24–48 horas.",
+        "Facturamos el mismo día."
+      ],
+      "featured_package": {
+        "name": "Plan Bienestar Anual",
+        "description": "Vacunas + 2 desparasitaciones + 2 consultas + descuento en adiestramiento",
+        "price_label": "$1,890 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Veterinary care and training with a full wellness plan 🩺",
+      "address": "Av. Eugenio Garza Sada 3820, Contry, Monterrey",
+      "opening_hours_text": "Mon–Fri 9:00–20:00 · Sat 9:00–14:00 · Emergencies via WhatsApp",
+      "service_categories": [
+        "Consultations",
+        "Prevention",
+        "Training"
+      ],
+      "services": [
+        {
+          "category": "Consultations",
+          "name": "General consultation",
+          "price_label": "$450 MXN"
+        },
+        {
+          "category": "Consultations",
+          "name": "Follow-up visit",
+          "price_label": "$300 MXN"
+        },
+        {
+          "category": "Prevention",
+          "name": "Canine vaccination plan",
+          "price_label": "From $380 MXN"
+        },
+        {
+          "category": "Prevention",
+          "name": "Internal & external deworming",
+          "price_label": "$250 MXN"
+        },
+        {
+          "category": "Prevention",
+          "name": "Senior panel (bloodwork + exam)",
+          "price_label": "$1,150 MXN"
+        },
+        {
+          "category": "Training",
+          "name": "Behavior evaluation (60 min)",
+          "price_label": "$500 MXN"
+        },
+        {
+          "category": "Training",
+          "name": "Basic obedience package (6 sessions)",
+          "price_label": "$2,400 MXN"
+        }
+      ],
+      "pet_notes_text": "After-hours emergencies via WhatsApp only.\nFree first behavior evaluation with vaccination.",
+      "policies": [
+        "Consultations by appointment; emergencies first-come.",
+        "Lab results in 24–48 hours.",
+        "Same-day invoicing."
+      ],
+      "featured_package": {
+        "name": "Annual Wellness Plan",
+        "description": "Vaccines + 2 dewormings + 2 consultations + training discount",
+        "price_label": "$1,890 MXN"
+      }
+    }
+  }
+}

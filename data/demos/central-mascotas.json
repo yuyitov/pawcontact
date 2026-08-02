@@ -1,0 +1,137 @@
+{
+  "public_slug": "central-mascotas",
+  "business_name": "Central Mascotas",
+  "business_type": "professional",
+  "brand_style": "clarity-editorial",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 222 638 9910",
+  "instagram": "https://instagram.com/centralmascotas.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/centralmascotas.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Central+Mascotas+Demo",
+  "google_reviews_url": "https://g.page/r/central-mascotas-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Todo en un solo lugar: estética, veterinaria, pensión y tienda 📋",
+      "address": "Blvd. Atlixcáyotl 2210, Angelópolis, Puebla",
+      "opening_hours_text": "Lun–Dom 9:00–20:00",
+      "service_categories": [
+        "Estética",
+        "Veterinaria",
+        "Pensión",
+        "Tienda"
+      ],
+      "services": [
+        {
+          "category": "Estética",
+          "name": "Baño + corte (todas las tallas)",
+          "price_label": "Desde $320 MXN"
+        },
+        {
+          "category": "Estética",
+          "name": "Paquete spa completo",
+          "price_label": "$540 MXN"
+        },
+        {
+          "category": "Veterinaria",
+          "name": "Consulta general",
+          "price_label": "$400 MXN"
+        },
+        {
+          "category": "Veterinaria",
+          "name": "Vacunación (por dosis)",
+          "price_label": "Desde $350 MXN"
+        },
+        {
+          "category": "Pensión",
+          "name": "Noche de pensión",
+          "price_label": "$260 MXN"
+        },
+        {
+          "category": "Tienda",
+          "name": "Alimento premium (por kilo)",
+          "price_label": "Desde $180 MXN"
+        },
+        {
+          "category": "Tienda",
+          "name": "Accesorios y juguetes",
+          "price_label": "Desde $90 MXN"
+        }
+      ],
+      "pet_notes_text": "Un expediente único para todos los servicios.\nAgenda todo en un solo mensaje de WhatsApp.",
+      "policies": [
+        "Citas de estética y consulta el mismo día.",
+        "Expediente digital compartido entre áreas.",
+        "Estacionamiento gratuito 2 horas."
+      ],
+      "featured_package": {
+        "name": "Día Resuelto",
+        "description": "Consulta + baño + noche de pensión + kilo de alimento premium",
+        "price_label": "$990 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Everything in one place: grooming, vet, boarding and shop 📋",
+      "address": "Blvd. Atlixcáyotl 2210, Angelópolis, Puebla",
+      "opening_hours_text": "Mon–Sun 9:00–20:00",
+      "service_categories": [
+        "Grooming",
+        "Veterinary",
+        "Boarding",
+        "Shop"
+      ],
+      "services": [
+        {
+          "category": "Grooming",
+          "name": "Bath + cut (all sizes)",
+          "price_label": "From $320 MXN"
+        },
+        {
+          "category": "Grooming",
+          "name": "Full spa package",
+          "price_label": "$540 MXN"
+        },
+        {
+          "category": "Veterinary",
+          "name": "General consultation",
+          "price_label": "$400 MXN"
+        },
+        {
+          "category": "Veterinary",
+          "name": "Vaccination (per dose)",
+          "price_label": "From $350 MXN"
+        },
+        {
+          "category": "Boarding",
+          "name": "Boarding night",
+          "price_label": "$260 MXN"
+        },
+        {
+          "category": "Shop",
+          "name": "Premium food (per kilo)",
+          "price_label": "From $180 MXN"
+        },
+        {
+          "category": "Shop",
+          "name": "Accessories and toys",
+          "price_label": "From $90 MXN"
+        }
+      ],
+      "pet_notes_text": "One record for every service.\nBook everything in a single WhatsApp message.",
+      "policies": [
+        "Same-day grooming and consultation.",
+        "Digital record shared across areas.",
+        "Free parking for 2 hours."
+      ],
+      "featured_package": {
+        "name": "Sorted Day",
+        "description": "Consultation + bath + boarding night + kilo of premium food",
+        "price_label": "$990 MXN"
+      }
+    }
+  }
+}

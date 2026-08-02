@@ -59,7 +59,7 @@ jobs:
       - name: Verify expected outputs exist (index.html + qr.svg per demo)
         run: |
           set -e
-          demos="boutique-bigotes hotel-colitas spa-de-patas veterinaria-altavida"
+          demos="academia-ladra bahia-azul boutique-bigotes canela-y-oro casa-terracota central-mascotas clinica-vetta hotel-colitas medianoche-pet-club pelusa-rosa spa-de-patas veterinaria-altavida"
           missing=0
           for slug in $demos; do
             for asset in index.html qr.svg; do

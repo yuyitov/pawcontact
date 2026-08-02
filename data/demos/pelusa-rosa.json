@@ -1,0 +1,137 @@
+{
+  "public_slug": "pelusa-rosa",
+  "business_name": "Pelusa Rosa",
+  "business_type": "beauty",
+  "brand_style": "soft-blush",
+  "primary_image_url": null,
+  "logo_url": null,
+  "whatsapp": "+52 33 5217 8842",
+  "instagram": "https://instagram.com/pelusarosa.demo",
+  "portfolio_link": {
+    "label": "",
+    "url": "https://instagram.com/pelusarosa.demo/reels"
+  },
+  "google_maps_url": "https://maps.google.com/?q=Pelusa+Rosa+Demo",
+  "google_reviews_url": "https://g.page/r/pelusa-rosa-demo/review",
+  "default_language": "es",
+  "content": {
+    "es": {
+      "short_description": "Spa y estética con manejo gentil para perros y gatos 🌸",
+      "address": "Av. Providencia 1520, Providencia, Guadalajara",
+      "opening_hours_text": "Mar–Sáb 10:00–19:00 · Dom 11:00–15:00 · Lun cerrado",
+      "service_categories": [
+        "Estética",
+        "Spa",
+        "Gatos"
+      ],
+      "services": [
+        {
+          "category": "Estética",
+          "name": "Baño + secado (razas pequeñas)",
+          "price_label": "$280 MXN"
+        },
+        {
+          "category": "Estética",
+          "name": "Corte de raza + baño (medianas)",
+          "price_label": "$460 MXN"
+        },
+        {
+          "category": "Estética",
+          "name": "Deslanado con acondicionador",
+          "price_label": "$390 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Facial de burbujas + mascarilla",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Aromaterapia relajante",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Gatos",
+          "name": "Baño felino sin estrés",
+          "price_label": "$430 MXN",
+          "description": "Manejo gentil certificado, sin jaula de secado"
+        },
+        {
+          "category": "Gatos",
+          "name": "Corte higiénico felino",
+          "price_label": "$270 MXN"
+        }
+      ],
+      "pet_notes_text": "Cartilla de vacunación al día obligatoria.\nHorario tranquilo disponible para mascotas nerviosas.",
+      "policies": [
+        "Solo con cita; agenda por WhatsApp.",
+        "Tolerancia de 15 minutos.",
+        "Foto del antes y después en cada visita."
+      ],
+      "featured_package": {
+        "name": "Día Rosa",
+        "description": "Baño + corte + facial de burbujas + aromaterapia + moño de regalo",
+        "price_label": "$680 MXN"
+      }
+    },
+    "en": {
+      "short_description": "Gentle-handling spa and grooming for dogs and cats 🌸",
+      "address": "Av. Providencia 1520, Providencia, Guadalajara",
+      "opening_hours_text": "Tue–Sat 10:00–19:00 · Sun 11:00–15:00 · Mon closed",
+      "service_categories": [
+        "Grooming",
+        "Spa",
+        "Cats"
+      ],
+      "services": [
+        {
+          "category": "Grooming",
+          "name": "Bath + blow-dry (small breeds)",
+          "price_label": "$280 MXN"
+        },
+        {
+          "category": "Grooming",
+          "name": "Breed cut + bath (medium)",
+          "price_label": "$460 MXN"
+        },
+        {
+          "category": "Grooming",
+          "name": "De-shedding with conditioner",
+          "price_label": "$390 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Bubble facial + mask",
+          "price_label": "$180 MXN"
+        },
+        {
+          "category": "Spa",
+          "name": "Relaxing aromatherapy",
+          "price_label": "$150 MXN"
+        },
+        {
+          "category": "Cats",
+          "name": "Stress-free cat bath",
+          "price_label": "$430 MXN",
+          "description": "Certified gentle handling, no cage drying"
+        },
+        {
+          "category": "Cats",
+          "name": "Feline hygiene trim",
+          "price_label": "$270 MXN"
+        }
+      ],
+      "pet_notes_text": "Up-to-date vaccination card required.\nQuiet slots available for nervous pets.",
+      "policies": [
+        "Appointment only; book via WhatsApp.",
+        "15-minute grace period.",
+        "Before & after photo at every visit."
+      ],
+      "featured_package": {
+        "name": "Pink Day",
+        "description": "Bath + cut + bubble facial + aromatherapy + bow included",
+        "price_label": "$680 MXN"
+      }
+    }
+  }
+}
