@@ -69,6 +69,12 @@ BRAND_TAGLINE          = "Service menus for pet businesses"
 # de HMU. Un estilo elegido fuera de esta lista cae al fallback (warm-sand si
 # está, si no el primero) marcado style_unmapped.
 VALID_BRAND_STYLES    = "sunny-paws,aqua-clean,sage-calm,warm-sand,black-gold,soft-blush,charcoal-clean,electric-slate,terracotta-warm,midnight-ink,clarity-editorial,horizon-teal"
+# Nombres COMERCIALES que apuntan a un slug del catalogo ("alias:slug,..."),
+# de styles.aliases del vertical.yaml. El estilo se resuelve haciendo slugify()
+# del nombre que la clienta LEE, asi que sin esto renombrar una paleta (Sunny
+# Paws -> Pink Grapefruit, 2026-08-16) manda al estilo de respaldo a quien la
+# elija. Vacio = ningun alias.
+BRAND_STYLE_ALIASES= "pink-grapefruit:sunny-paws,blue-chocolate:horizon-teal,ink-ivory:warm-sand"
 # ID(s) del Payment Link de esta vertical (plink_...). Acepta varios separados
 # por coma — p.ej. el link USD y el MXN — para que todas las compras de esta
 # vertical se procesen, ignorando ventas de otros productos de la cuenta.
