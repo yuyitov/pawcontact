@@ -1,0 +1,218 @@
+{
+  "_comment": "GENERADO por test/generar_crosswalk.mjs desde el inventario de los formularios vivos. No editar a mano.",
+  "snapshot_date": "2026-10-16",
+  "forms": {
+    "en": "BzqXA5",
+    "es": "A7NdA0"
+  },
+  "questions": [
+    {
+      "en": "business_name",
+      "es": "business_name"
+    },
+    {
+      "en": "brand_style",
+      "es": "brand_style",
+      "options": [
+        {
+          "en": "Pink Grapefruit — juicy and full of energy (groomers)",
+          "es": "Pink Grapefruit — jugoso y con energia (estilistas/grooming)"
+        },
+        {
+          "en": "aqua-clean — fresh and clean (vet clinics)",
+          "es": "aqua-clean — limpio y fresco (veterinarias)"
+        },
+        {
+          "en": "sage-calm — natural and calm (boarding/daycare)",
+          "es": "sage-calm — natural y relajante (hoteles/guarderias)"
+        },
+        {
+          "en": "Ink & Ivory — minimal and editorial (boutiques)",
+          "es": "Ink & Ivory — minimo y editorial (boutiques)"
+        },
+        {
+          "en": "black-gold — elegant and premium (boutiques)",
+          "es": "black-gold — elegante y premium (boutiques)"
+        },
+        {
+          "en": "soft-blush — soft and caring (spa/grooming)",
+          "es": "soft-blush — suave y cariñoso (spa/estética)"
+        },
+        {
+          "en": "charcoal-clean — modern and professional (vet clinics/training)",
+          "es": "charcoal-clean — moderno y profesional (veterinarias/entrenamiento)"
+        },
+        {
+          "en": "electric-slate — bold and dynamic (training/daycare)",
+          "es": "electric-slate — audaz y dinámico (entrenamiento/guardería)"
+        },
+        {
+          "en": "terracotta-warm — artisanal and welcoming (boutiques/boarding)",
+          "es": "terracotta-warm — artesanal y acogedor (boutiques/hospedaje)"
+        },
+        {
+          "en": "midnight-ink — refined and distinguished (premium services)",
+          "es": "midnight-ink — sobrio y distinguido (servicios premium)"
+        },
+        {
+          "en": "clarity-editorial — clear and organized (multi-service businesses)",
+          "es": "clarity-editorial — claro y ordenado (negocios con muchos servicios)"
+        },
+        {
+          "en": "Blue Chocolate — modern and full of character (boarding/vet clinics)",
+          "es": "Blue Chocolate — moderno y con caracter (hospedaje/veterinarias)"
+        }
+      ]
+    },
+    {
+      "en": "business_type",
+      "es": "business_type",
+      "options": [
+        {
+          "en": "Pet grooming",
+          "es": "Estética canina para mascotas"
+        },
+        {
+          "en": "Pet clinic / veterinary care",
+          "es": "Veterinaria"
+        },
+        {
+          "en": "Boarding / daycare",
+          "es": "Hospedaje / guardería"
+        },
+        {
+          "en": "Dog training",
+          "es": "Entrenamiento canino"
+        },
+        {
+          "en": "Pet products / boutique",
+          "es": "Tienda / boutique de productos"
+        }
+      ]
+    },
+    {
+      "en": "short_description",
+      "es": "short_description"
+    },
+    {
+      "en": "whatsapp",
+      "es": "whatsapp"
+    },
+    {
+      "en": "phone",
+      "es": "phone"
+    },
+    {
+      "en": "public_email",
+      "es": "public_email"
+    },
+    {
+      "en": "website",
+      "es": "website"
+    },
+    {
+      "en": "booking_url",
+      "es": "booking_url"
+    },
+    {
+      "en": "instagram",
+      "es": "instagram"
+    },
+    {
+      "en": "facebook",
+      "es": "facebook"
+    },
+    {
+      "en": "tiktok",
+      "es": "tiktok"
+    },
+    {
+      "en": "primary_cta",
+      "es": "primary_cta",
+      "options": [
+        {
+          "en": "WhatsApp",
+          "es": "WhatsApp"
+        },
+        {
+          "en": "Phone call",
+          "es": "Llamada telefónica"
+        },
+        {
+          "en": "Booking link",
+          "es": "Reservas / agenda"
+        },
+        {
+          "en": "Website",
+          "es": "Sitio web"
+        },
+        {
+          "en": "Instagram",
+          "es": "Instagram"
+        }
+      ]
+    },
+    {
+      "en": "services_text",
+      "es": "services_text"
+    },
+    {
+      "en": "featured_text",
+      "es": "featured_text"
+    },
+    {
+      "en": "policies_text",
+      "es": "policies_text"
+    },
+    {
+      "en": "faq_text",
+      "es": "faq_text"
+    },
+    {
+      "en": "opening_hours_text",
+      "es": "opening_hours_text"
+    },
+    {
+      "en": "address",
+      "es": "address"
+    },
+    {
+      "en": "google_maps_url",
+      "es": "google_maps_url"
+    },
+    {
+      "en": "google_reviews_url",
+      "es": "google_reviews_url"
+    },
+    {
+      "en": "delivery_pickup_links_text",
+      "es": "delivery_pickup_links_text"
+    },
+    {
+      "en": "logo_url",
+      "es": "logo_url"
+    },
+    {
+      "en": "image_url",
+      "es": "image_url"
+    },
+    {
+      "en": "gallery_image_urls",
+      "es": "gallery_image_urls"
+    },
+    {
+      "en": "pet_notes_text",
+      "es": "pet_notes_text"
+    },
+    {
+      "en": "photo_rights_confirmed",
+      "es": "photo_rights_confirmed",
+      "options": [
+        {
+          "en": "Yes",
+          "es": "Sí"
+        }
+      ]
+    }
+  ]
+}
